@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Menu, X, Phone, Mail, Heart } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -26,14 +27,14 @@ const Header = () => {
             <a href="#services" className="text-gray-700 hover:text-teal-600 transition-colors">Services</a>
             <a href="#about" className="text-gray-700 hover:text-teal-600 transition-colors">About</a>
             <a href="#contact" className="text-gray-700 hover:text-teal-600 transition-colors">Contact</a>
-            <a 
-              href="/rockhaven-wedding.html" 
+            <Link 
+              to="/wedding" 
               className="flex items-center space-x-1 text-pink-600 hover:text-pink-700 transition-colors bg-pink-50 px-3 py-2 rounded-lg hover:bg-pink-100"
               title="Wedding Transport Portal"
             >
               <Heart size={16} />
               <span className="text-sm font-medium">Wedding Portal</span>
-            </a>
+            </Link>
           </nav>
 
           {/* Contact Info - Hidden on mobile, shown on large screens */}
@@ -90,15 +91,15 @@ const Header = () => {
               >
                 Contact
               </a>
-              <a 
-                href="/rockhaven-wedding.html" 
+              <Link 
+                to="/wedding" 
                 className="flex items-center space-x-2 text-pink-600 py-2 px-4 rounded-lg hover:bg-pink-50 font-medium"
                 onClick={() => setIsMenuOpen(false)}
                 title="Wedding Transport Portal"
               >
                 <Heart size={18} />
                 <span>Wedding Portal</span>
-              </a>
+              </Link>
               <div className="pt-4 border-t space-y-3">
                 <a href="tel:+27795036849" className="flex items-center space-x-2 text-teal-600 py-2 px-4 rounded-lg hover:bg-teal-50">
                   <Phone size={18} />
