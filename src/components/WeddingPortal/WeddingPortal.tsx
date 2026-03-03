@@ -42,20 +42,35 @@ const WeddingPortal = () => {
   const [loginError, setLoginError] = useState('');
   
   // Data State (Initial data from PDF/Assets)
-  const [details, setDetails] = useState<WeddingDetails>({
-    date: 'Saturday, 04 April 2026',
-    venue: 'Rockhaven Lodge',
-    ceremonyTime: '3:00 PM',
-    receptionDepartureTimes: ['10:00 PM', '12:00 AM', '01:00 AM'],
-    contactWhatsApp: '+27 79 503 6849',
-    contactEmail: 'Adam@overbergtransfers.com'
+  const [details, setDetails] = useState<WeddingDetails>(() => {
+    const saved = localStorage.getItem('wedding_details');
+    return saved ? JSON.parse(saved) : {
+      date: 'Saturday, 04 April 2026',
+      venue: 'Rockhaven Lodge',
+      ceremonyTime: '3:00 PM',
+      receptionDepartureTimes: ['10:00 PM', '12:00 AM', '01:00 AM'],
+      contactWhatsApp: '+27 79 503 6849',
+      contactEmail: 'Adam@overbergtransfers.com'
+    };
   });
 
-  const [schedule, setSchedule] = useState<ScheduleItem[]>([
-    { id: '1', location: 'Elgin Valley Inn', time: '1:45 PM', status: 'On Time' },
-    { id: '2', location: 'Orchard Guest House', time: '2:15 PM', status: 'On Time' },
-    { id: '3', location: 'Rockhaven Reception', time: '2:45 PM', status: 'On Time' },
-  ]);
+  const [schedule, setSchedule] = useState<ScheduleItem[]>(() => {
+    const saved = localStorage.getItem('wedding_schedule');
+    return saved ? JSON.parse(saved) : [
+      { id: '1', location: 'Elgin Valley Inn', time: '1:45 PM', status: 'On Time' },
+      { id: '2', location: 'Orchard Guest House', time: '2:15 PM', status: 'On Time' },
+      { id: '3', location: 'Rockhaven Reception', time: '2:45 PM', status: 'On Time' },
+    ];
+  });
+
+  // --- Persistence ---
+  useEffect(() => {
+    localStorage.setItem('wedding_details', JSON.stringify(details));
+  }, [details]);
+
+  useEffect(() => {
+    localStorage.setItem('wedding_schedule', JSON.stringify(schedule));
+  }, [schedule]);
 
   // --- Auth Handlers ---
   const handleLogin = (e: React.FormEvent) => {
@@ -433,7 +448,7 @@ const WeddingPortal = () => {
             <span className="text-sm font-bold">Admin Mode Active</span>
           </div>
           <p className="text-xs text-slate-500 leading-relaxed">
-            All changes are live in this session. In a real app, you would save these to a database. Since this is frontend-only, changes persist as long as the page is open.
+            All changes are saved to your browser's local storage. They will persist even if you refresh the page or close the browser.
           </p>
         </div>
       )}
