@@ -14,8 +14,10 @@ import {
   Edit2,
   Save,
   Plus,
-  Trash2
+  Trash2,
+  Home
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 // --- Types ---
 interface ScheduleItem {
@@ -32,10 +34,20 @@ interface WeddingDetails {
   receptionDepartureTimes: string[];
   contactWhatsApp: string;
   contactEmail: string;
+  festivities: FestivityItem[];
+}
+
+interface FestivityItem {
+  id: string;
+  title: string;
+  time: string;
+  description: string;
+  icon: 'wine' | 'coffee' | 'info';
 }
 
 const WeddingPortal = () => {
   // --- State ---
+  const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [accessCode, setAccessCode] = useState('');
@@ -50,7 +62,12 @@ const WeddingPortal = () => {
       ceremonyTime: '3:00 PM',
       receptionDepartureTimes: ['10:00 PM', '12:00 AM', '01:00 AM'],
       contactWhatsApp: '+27 79 503 6849',
-      contactEmail: 'Adam@overbergtransfers.com'
+      contactEmail: 'Adam@overbergtransfers.com',
+      festivities: [
+        { id: '1', title: 'Meet & Greet', time: 'Friday 5 PM', description: 'Grabouw Country Club on Eikenhof Dam. Light supper & drinks for sale.', icon: 'wine' },
+        { id: '2', title: 'Recovery Breakfast', time: 'Sunday 9 AM', description: 'Elgin Railway Market / Peregrine / South Hill / Hickory Shack.', icon: 'coffee' },
+        { id: '3', title: 'Additional Tours', time: 'On Request', description: 'Wine Tours, Table Mountain, Betty\'s Bay Penguins. Contact us for private bookings.', icon: 'info' }
+      ]
     };
   });
 
@@ -117,11 +134,42 @@ const WeddingPortal = () => {
     setSchedule(prev => prev.filter(item => item.id !== id));
   };
 
+  const updateFestivity = (id: string, field: keyof FestivityItem, value: string) => {
+    setDetails(prev => ({
+      ...prev,
+      festivities: prev.festivities.map(f => f.id === id ? { ...f, [field]: value } : f)
+    }));
+  };
+
+  const addFestivity = () => {
+    const newItem: FestivityItem = {
+      id: Date.now().toString(),
+      title: 'New Event',
+      time: 'New Time',
+      description: 'Event Description',
+      icon: 'info'
+    };
+    setDetails(prev => ({ ...prev, festivities: [...prev.festivities, newItem] }));
+  };
+
+  const removeFestivity = (id: string) => {
+    setDetails(prev => ({ ...prev, festivities: prev.festivities.filter(f => f.id !== id) }));
+  };
+
   // --- Render Components ---
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
+          <div className="flex justify-between items-start mb-6">
+            <button 
+              onClick={() => navigate('/')}
+              className="text-slate-400 hover:text-teal-600 transition-colors flex items-center space-x-1"
+            >
+              <Home size={18} />
+              <span className="text-sm font-medium">Home</span>
+            </button>
+          </div>
           <div className="text-center mb-8">
             <div className="bg-teal-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <Bus className="text-teal-600" size={32} />
@@ -163,10 +211,20 @@ const WeddingPortal = () => {
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Bus className="text-teal-600" size={24} />
-            <span className="font-bold text-slate-800">Rockhaven 2026</span>
-            {isAdmin && <span className="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Admin</span>}
+          <div className="flex items-center space-x-4">
+            <button 
+              onClick={() => navigate('/')}
+              className="text-slate-400 hover:text-teal-600 transition-colors flex items-center space-x-1"
+              title="Back to Home"
+            >
+              <Home size={20} />
+            </button>
+            <div className="h-6 w-px bg-slate-200"></div>
+            <div className="flex items-center space-x-2">
+              <Bus className="text-teal-600" size={24} />
+              <span className="font-bold text-slate-800">Rockhaven 2026</span>
+              {isAdmin && <span className="bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Admin</span>}
+            </div>
           </div>
           <button 
             onClick={handleLogout}
@@ -408,34 +466,76 @@ const WeddingPortal = () => {
 
         {/* Additional Activities */}
         <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-          <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center">
-            <Wine className="mr-2 text-teal-600" size={20} />
-            Wedding Week Festivities
-          </h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-              <div className="flex items-center text-teal-600 mb-2">
-                <Wine size={16} className="mr-1" />
-                <span className="text-xs font-bold uppercase tracking-wider">Friday 5 PM</span>
-              </div>
-              <h3 className="font-bold text-slate-800 text-sm">Meet & Greet</h3>
-              <p className="text-xs text-slate-500 mt-1 leading-relaxed">Grabouw Country Club on Eikenhof Dam. Light supper & drinks for sale.</p>
-            </div>
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-              <div className="flex items-center text-teal-600 mb-2">
-                <Coffee size={16} className="mr-1" />
-                <span className="text-xs font-bold uppercase tracking-wider">Sunday 9 AM</span>
-              </div>
-              <h3 className="font-bold text-slate-800 text-sm">Recovery Breakfast</h3>
-              <p className="text-xs text-slate-500 mt-1 leading-relaxed">Elgin Railway Market / Peregrine / South Hill / Hickory Shack.</p>
-            </div>
-            <div className="p-4 bg-teal-50 rounded-xl border border-teal-100 sm:col-span-2 lg:col-span-1">
-              <h3 className="font-bold text-teal-900 text-sm">Additional Tours</h3>
-              <p className="text-xs text-teal-700 mt-1 leading-relaxed">Wine Tours, Table Mountain, Betty's Bay Penguins. Contact us for private bookings.</p>
-              <button className="mt-3 text-[10px] font-bold text-teal-600 uppercase tracking-widest flex items-center">
-                Book Private <ChevronRight size={12} className="ml-1" />
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-slate-900 flex items-center">
+              <Wine className="mr-2 text-teal-600" size={20} />
+              Wedding Week Festivities
+            </h2>
+            {isAdmin && (
+              <button 
+                onClick={addFestivity}
+                className="bg-teal-600 hover:bg-teal-700 text-white p-2 rounded-lg transition-colors"
+              >
+                <Plus size={20} />
               </button>
-            </div>
+            )}
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {details.festivities.map((event) => (
+              <div key={event.id} className="p-4 bg-slate-50 rounded-xl border border-slate-100 relative group">
+                <div className="flex items-center text-teal-600 mb-2">
+                  {event.icon === 'wine' ? <Wine size={16} className="mr-1" /> : 
+                   event.icon === 'coffee' ? <Coffee size={16} className="mr-1" /> : 
+                   <Info size={16} className="mr-1" />}
+                  {isAdmin ? (
+                    <input 
+                      value={event.time}
+                      onChange={(e) => updateFestivity(event.id, 'time', e.target.value)}
+                      className="bg-transparent border-b border-teal-200 text-xs font-bold uppercase tracking-wider focus:outline-none w-full"
+                    />
+                  ) : (
+                    <span className="text-xs font-bold uppercase tracking-wider">{event.time}</span>
+                  )}
+                </div>
+                {isAdmin ? (
+                  <>
+                    <input 
+                      value={event.title}
+                      onChange={(e) => updateFestivity(event.id, 'title', e.target.value)}
+                      className="w-full font-bold text-slate-800 text-sm mb-1 bg-transparent border-b border-slate-200 focus:outline-none"
+                    />
+                    <textarea 
+                      value={event.description}
+                      onChange={(e) => updateFestivity(event.id, 'description', e.target.value)}
+                      className="w-full text-xs text-slate-500 leading-relaxed bg-transparent border-b border-slate-200 focus:outline-none resize-none"
+                      rows={2}
+                    />
+                    <div className="mt-2 flex space-x-2">
+                      <select 
+                        value={event.icon}
+                        onChange={(e) => updateFestivity(event.id, 'icon', e.target.value as any)}
+                        className="text-[10px] bg-white border border-slate-200 rounded px-1"
+                      >
+                        <option value="wine">Wine</option>
+                        <option value="coffee">Coffee</option>
+                        <option value="info">Info</option>
+                      </select>
+                      <button 
+                        onClick={() => removeFestivity(event.id)}
+                        className="text-red-400 hover:text-red-600"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="font-bold text-slate-800 text-sm">{event.title}</h3>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">{event.description}</p>
+                  </>
+                )}
+              </div>
+            ))}
           </div>
         </section>
       </main>
