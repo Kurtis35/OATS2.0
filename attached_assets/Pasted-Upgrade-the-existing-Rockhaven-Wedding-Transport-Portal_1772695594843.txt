@@ -1,0 +1,276 @@
+Upgrade the existing Rockhaven Wedding Transport Portal into an interactive RSVP-style transport booking system while keeping the website 100% frontend only.
+
+Do not build any backend server.
+
+Use only:
+
+HTML
+CSS
+Vanilla JavaScript
+
+External services allowed:
+
+Google Sheets
+Google Apps Script webhook
+Email notification via Apps Script
+
+The system must be beautiful, modern, and extremely easy for guests to use, while also giving the transport coordinator a clear admin dashboard.
+
+Architecture
+
+Guests submit booking → sent to Google Sheet via Apps Script webhook → admin dashboard reads data from sheet → data updates live on the page.
+
+No database hosted on the website.
+
+Page Structure
+
+Create two main sections:
+
+Guest Transport Portal
+
+Admin Dashboard
+
+Both accessible from the same page.
+
+Admin portal must be protected by a different password.
+
+Section 1 — Hero
+
+Full-width hero image with Elgin vineyard landscape.
+
+Overlay gradient.
+
+Content:
+
+Rockhaven Wedding Transport Portal
+
+Subtitle:
+
+Transport coordination for the Rockhaven Wedding in Elgin Valley.
+
+Display event details:
+
+Saturday 4 April 2026
+Ceremony begins at 3:00 PM
+
+Add smooth fade animation.
+
+Section 2 — Guest Access Portal
+
+Create a secure login card.
+
+Access code:
+
+OATS2026
+
+When correct:
+
+Hide login card and reveal guest portal.
+
+Save login state using localStorage.
+
+Section 3 — Shuttle Status Banner
+
+Banner message editable via JavaScript variable.
+
+Example:
+
+“All shuttles are currently on time. Pickup window is between 1:45 PM and 2:45 PM.”
+
+Use green highlight bar.
+
+Section 4 — Lodge Pickup Finder
+
+Interactive lodge lookup.
+
+Dropdown list of accommodations.
+
+When guest selects lodge:
+
+Display pickup time.
+
+Use data array stored in JS.
+
+Example:
+
+Rockhaven Lodge – 1:45 PM
+Elgin Valley Inn – 2:15 PM
+Orchard Guest House – 2:30 PM
+
+Display result in highlighted card.
+
+Section 5 — Transport RSVP Form
+
+Create a beautiful multi-step form.
+
+Fields:
+
+Full Name
+Phone Number
+Email
+Accommodation (dropdown)
+Number of Guests
+Airport Transfer Required (Yes / No)
+Preferred Pickup Window
+
+When submitted:
+
+Send form data to a Google Apps Script webhook URL using fetch POST request.
+
+Example:
+
+fetch(webhookURL, { method: "POST", body: formData })
+
+After submission show confirmation message:
+
+“Your transport booking has been received. Our team will contact you if needed.”
+
+Section 6 — Experience Elgin
+
+Image gallery with cards.
+
+Cards include:
+
+Wine Tours
+Hermanus Coastal Tour
+Penguin Tour
+Table Mountain Tour
+V&A Waterfront Visit
+
+Each card includes button:
+
+Enquire Now
+
+Link to:
+
+mailto:Adam@overbergtransfers.com
+
+Section 7 — FAQ
+
+Accordion style.
+
+Topics:
+
+Elgin weather
+Shuttle punctuality
+No Uber services
+Emergency contact
+
+Section 8 — Contact
+
+Display coordinator details:
+
+Adam Jantjies
+
+Phone / WhatsApp
+079 503 6849
+066 233 4928
+
+Email
+Adam@overbergtransfers.com
+
+Section 9 — Admin Portal
+
+Add hidden admin login.
+
+Admin password example:
+
+ADMINGETT2026
+
+When admin logs in:
+
+Display dashboard.
+
+Admin Dashboard
+
+Pull data from Google Sheet using a published sheet JSON endpoint.
+
+Display bookings in a table.
+
+Columns:
+
+Guest Name
+Phone
+Email
+Accommodation
+Guest Count
+Pickup Window
+Airport Transfer
+
+Include:
+
+Search bar
+Filter by accommodation
+Total guest counter
+Total bookings counter
+
+Add export button:
+
+Download CSV.
+
+Live Data Sync
+
+Admin dashboard should refresh automatically every 30 seconds.
+
+Guests submitting forms should appear in the dashboard without reloading page.
+
+Email Notifications
+
+When a form submission happens:
+
+Google Apps Script should send an email to:
+
+Adam@overbergtransfers.com
+
+Subject:
+
+New Wedding Transport Booking
+
+Email body includes all guest details.
+
+UI Design
+
+The portal must look modern and elegant.
+
+Use:
+
+Large cards
+Soft shadows
+Rounded corners
+Clean typography
+Responsive layout
+Smooth transitions
+
+Colors:
+
+White
+Soft green
+Neutral tones
+
+Use scenic images of:
+
+Elgin Valley vineyards
+Wedding venue landscapes
+Overberg mountains
+
+Editable Variables
+
+At the top of the JS file include:
+
+ACCESS_CODE
+ADMIN_PASSWORD
+SHUTTLE_DATA
+STATUS_MESSAGE
+GOOGLE_SCRIPT_WEBHOOK_URL
+GOOGLE_SHEET_JSON_URL
+
+Final Goal
+
+The system must:
+
+Look premium
+Work perfectly on mobile
+Allow guests to book transport easily
+Send booking data to spreadsheet
+Allow admin to view bookings in dashboard
+Keep the website fully frontend only
