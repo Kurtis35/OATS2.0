@@ -22,7 +22,10 @@ import {
   Download,
   RefreshCw,
   Lock,
-  ChevronRight
+  ChevronRight,
+  Shield,
+  Star,
+  Zap
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -56,6 +59,27 @@ interface Booking {
   airportTransfer: string;
   pickupWindow: string;
 }
+
+const LODGES = [
+  "Elgin River Lodge",
+  "33 Viljoenshoop Road",
+  "Lavendar Cottages",
+  "Cheverals Farm",
+  "Oaklane Cottages",
+  "Elgin Country Lodge",
+  "Galileo",
+  "Elgin Vintners",
+  "Moortop Cottages",
+  "Villa Eike",
+  "Belfield Wines",
+  "South Hill",
+  "Villa Exner",
+  "Apple Mountain Guest Farm",
+  "Vredenhof",
+  "Wildekrans Country House",
+  "Endless Vinyards WWE",
+  "Inn On Highlands"
+];
 
 const WeddingPortal = () => {
   const navigate = useNavigate();
@@ -98,14 +122,20 @@ const WeddingPortal = () => {
 
   const [schedule, setSchedule] = useState<ScheduleItem[]>(() => {
     const saved = localStorage.getItem('wedding_schedule_v2');
-    return saved ? JSON.parse(saved) : [
-      { id: '1', location: 'Rockhaven Lodge', time: '1:45 PM', status: 'On Time' },
-      { id: '2', location: 'Elgin Valley Inn', time: '2:15 PM', status: 'On Time' },
-      { id: '3', location: 'Orchard Guest House', time: '2:30 PM', status: 'On Time' },
-    ];
+    if (saved) return JSON.parse(saved);
+    
+    return LODGES.map((name, index) => ({
+      id: String(index + 1),
+      location: name,
+      time: '1:45 PM',
+      status: 'On Time'
+    }));
   });
 
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>(() => {
+    const saved = localStorage.getItem('wedding_local_bookings');
+    return saved ? JSON.parse(saved) : [];
+  });
 
   // Persistence
   useEffect(() => {
@@ -115,6 +145,10 @@ const WeddingPortal = () => {
   useEffect(() => {
     localStorage.setItem('wedding_schedule_v2', JSON.stringify(schedule));
   }, [schedule]);
+
+  useEffect(() => {
+    localStorage.setItem('wedding_local_bookings', JSON.stringify(bookings));
+  }, [bookings]);
 
   // Session check
   useEffect(() => {
@@ -128,7 +162,18 @@ const WeddingPortal = () => {
     try {
       const response = await fetch(details.sheetJsonUrl);
       const data = await response.json();
-      setBookings(Array.isArray(data) ? data : (data.bookings || []));
+      const remoteBookings = Array.isArray(data) ? data : (data.bookings || []);
+      
+      // Merge remote with local (using email as key)
+      setBookings(prev => {
+        const local = [...prev];
+        remoteBookings.forEach((rb: any) => {
+          if (!local.find(lb => lb.email === rb.email)) {
+            local.push(rb);
+          }
+        });
+        return local;
+      });
     } catch (e) {
       console.error('Sync failed', e);
     } finally {
@@ -176,8 +221,13 @@ const WeddingPortal = () => {
   const handleRSVPSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData.entries());
+    const data = Object.fromEntries(formData.entries()) as unknown as Booking;
+    data.timestamp = new Date().toLocaleString();
 
+    // Save locally for dashboard immediately (Frontend Only requirement)
+    setBookings(prev => [...prev, data]);
+
+    // Send to Webhook/Email service
     if (details.webhookUrl) {
       try {
         await fetch(details.webhookUrl, {
@@ -188,6 +238,7 @@ const WeddingPortal = () => {
         });
       } catch (e) { console.error(e); }
     }
+
     setFormSubmitted(true);
     setRsvpStep(3);
   };
@@ -195,7 +246,7 @@ const WeddingPortal = () => {
   const downloadCSV = () => {
     if (bookings.length === 0) return;
     const headers = Object.keys(bookings[0]).join(',');
-    const rows = bookings.map(b => Object.values(b).join(','));
+    const rows = bookings.map(b => Object.values(b).map(v => `"${v}"`).join(','));
     const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
@@ -331,25 +382,33 @@ const WeddingPortal = () => {
             <div className="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-100 md:col-span-2">
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Configuration</p>
               <div className="flex space-x-2">
-                <input 
-                  placeholder="Webhook URL" 
-                  value={details.webhookUrl} 
-                  onChange={(e) => setDetails({...details, webhookUrl: e.target.value})}
-                  className="flex-grow bg-slate-50 border border-slate-100 rounded-lg px-3 py-1.5 text-[10px] outline-none focus:border-teal-500"
-                />
-                <input 
-                  placeholder="Sheet JSON URL" 
-                  value={details.sheetJsonUrl} 
-                  onChange={(e) => setDetails({...details, sheetJsonUrl: e.target.value})}
-                  className="flex-grow bg-slate-50 border border-slate-100 rounded-lg px-3 py-1.5 text-[10px] outline-none focus:border-teal-500"
-                />
+                <div className="flex-grow space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-[9px] font-bold text-slate-400 uppercase w-20">Webhook:</span>
+                    <input 
+                      placeholder="Webhook URL (Zapier/Make)" 
+                      value={details.webhookUrl} 
+                      onChange={(e) => setDetails({...details, webhookUrl: e.target.value})}
+                      className="flex-grow bg-slate-50 border border-slate-100 rounded-lg px-3 py-1.5 text-[10px] outline-none focus:border-teal-500"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-[9px] font-bold text-slate-400 uppercase w-20">JSON URL:</span>
+                    <input 
+                      placeholder="Sheet JSON URL" 
+                      value={details.sheetJsonUrl} 
+                      onChange={(e) => setDetails({...details, sheetJsonUrl: e.target.value})}
+                      className="flex-grow bg-slate-50 border border-slate-100 rounded-lg px-3 py-1.5 text-[10px] outline-none focus:border-teal-500"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Table Control */}
           <div className="bg-white rounded-[2rem] shadow-xl border border-slate-100 overflow-hidden">
-            <div className="p-8 border-b border-slate-50 flex flex-col md:row items-center justify-between gap-4">
+            <div className="p-8 border-b border-slate-50 flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="relative w-full md:w-96">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input 
@@ -366,14 +425,14 @@ const WeddingPortal = () => {
                   className="px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm font-medium outline-none"
                 >
                   <option value="All">All Accommodations</option>
-                  {schedule.map(s => <option key={s.id} value={s.location}>{s.location}</option>)}
+                  {LODGES.map((name, i) => <option key={i} value={name}>{name}</option>)}
                 </select>
                 <button 
                   onClick={downloadCSV}
                   className="flex items-center space-x-2 bg-slate-900 text-white px-6 py-3 rounded-xl hover:bg-slate-800 transition-all font-bold text-sm"
                 >
                   <Download size={16} />
-                  <span>Export CSV</span>
+                  <span>Export SPREADSHEET</span>
                 </button>
               </div>
             </div>
@@ -439,6 +498,47 @@ const WeddingPortal = () => {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-12 space-y-12 animate-fade-in">
+        {/* Marketing Banner */}
+        <div className="relative overflow-hidden bg-slate-900 rounded-[2.5rem] p-8 md:p-12 text-white shadow-2xl">
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="max-w-xl text-center md:text-left">
+              <div className="inline-flex items-center space-x-2 bg-teal-500/20 text-teal-400 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6">
+                <Star size={14} />
+                <span>Premium Guest Experience</span>
+              </div>
+              <h2 className="text-3xl md:text-4xl font-black mb-4">Travel in Style with Overberg Transfers</h2>
+              <p className="text-slate-400 text-lg font-light leading-relaxed mb-8">
+                We're more than just wedding transport. Discover our premium private tours, airport transfers, and VIP travel services across the Western Cape.
+              </p>
+              <div className="flex flex-wrap justify-center md:justify-start gap-4">
+                <button className="bg-white text-slate-900 px-8 py-3 rounded-2xl font-bold hover:bg-teal-400 transition-all flex items-center space-x-2">
+                  <span>Explore Services</span>
+                  <ChevronRight size={18} />
+                </button>
+                <div className="flex items-center space-x-2 text-slate-400 text-sm font-medium">
+                  <Shield size={16} className="text-teal-500" />
+                  <span>5-Star Rated Service</span>
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white/5 p-6 rounded-3xl border border-white/10 hover:bg-white/10 transition-colors group">
+                <Zap size={24} className="text-teal-400 mb-4 group-hover:scale-110 transition-transform" />
+                <h4 className="font-bold text-sm mb-1">Fast & Reliable</h4>
+                <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">Always on time</p>
+              </div>
+              <div className="bg-white/5 p-6 rounded-3xl border border-white/10 hover:bg-white/10 transition-colors group">
+                <Users size={24} className="text-teal-400 mb-4 group-hover:scale-110 transition-transform" />
+                <h4 className="font-bold text-sm mb-1">Group Travel</h4>
+                <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">Up to 22 Seaters</p>
+              </div>
+            </div>
+          </div>
+          <div className="absolute -bottom-20 -left-20 text-white/5 pointer-events-none rotate-12">
+            <Bus size={300} />
+          </div>
+        </div>
+
         {/* Status Banner */}
         <div className="bg-teal-50 border border-teal-100 rounded-3xl p-6 flex items-center space-x-4 shadow-sm">
           <div className="bg-teal-500 p-3 rounded-2xl text-white shadow-lg shadow-teal-500/20"><Bus size={24} /></div>
@@ -498,72 +598,93 @@ const WeddingPortal = () => {
                   </div>
                 </div>
               </div>
-              <div className="mt-12 pt-12 border-t border-white/10">
-                <div className="flex items-center space-x-3 text-teal-400">
-                  <Info size={20} />
-                  <span className="text-xs font-bold uppercase tracking-widest">End-to-End Secure</span>
+              <div className="mt-20 pt-10 border-t border-white/10 hidden lg:block">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="bg-teal-500/10 p-2 rounded-lg text-teal-400"><Shield size={20}/></div>
+                  <span className="text-sm font-bold tracking-widest uppercase text-slate-400">Secure Submission</span>
                 </div>
+                <p className="text-xs text-slate-500">Your information is used only for wedding transport logistics and premium service offers.</p>
               </div>
             </div>
 
-            <div className="p-10 md:p-16">
-              {rsvpStep === 3 ? (
-                <div className="text-center py-10 animate-fade-in">
-                  <div className="bg-teal-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8">
-                    <CheckCircle className="text-teal-600" size={48} />
+            <div className="p-10 md:p-16 relative">
+              {formSubmitted ? (
+                <div className="text-center py-20 animate-fade-in">
+                  <div className="w-24 h-24 bg-teal-50 text-teal-500 rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce-subtle shadow-xl shadow-teal-500/10">
+                    <CheckCircle size={48} />
                   </div>
-                  <h3 className="text-3xl font-bold text-slate-800 mb-4">RSVP Received!</h3>
-                  <p className="text-slate-500 font-light text-lg mb-8">Your transport booking has been received. Our team will contact you if needed.</p>
-                  <button onClick={() => setRsvpStep(1)} className="text-teal-600 font-bold hover:underline">Submit another booking</button>
+                  <h3 className="text-3xl font-bold text-slate-800 mb-4">You're All Set!</h3>
+                  <p className="text-slate-500 mb-10 max-w-xs mx-auto text-lg leading-relaxed">Thank you for confirming. We've sent your details to the coordination team.</p>
+                  <button 
+                    onClick={() => {setFormSubmitted(false); setRsvpStep(1);}}
+                    className="text-teal-600 font-bold hover:text-teal-700 transition-colors flex items-center justify-center mx-auto"
+                  >
+                    <RefreshCw size={18} className="mr-2" />
+                    <span>Submit another RSVP</span>
+                  </button>
+                  
+                  {/* Marketing Call to Action */}
+                  <div className="mt-12 p-6 bg-slate-50 rounded-3xl border border-slate-100 text-left">
+                    <h4 className="font-bold text-slate-800 mb-2">Need an Airport Transfer?</h4>
+                    <p className="text-sm text-slate-500 mb-4 leading-relaxed">Book a premium private shuttle for your arrival or departure from CPT at a special wedding rate.</p>
+                    <button className="w-full bg-slate-900 text-white py-3 rounded-xl font-bold text-sm hover:bg-teal-600 transition-all">Book Private Transfer</button>
+                  </div>
                 </div>
               ) : (
                 <form onSubmit={handleRSVPSubmit} className="space-y-6 animate-fade-in">
                   {rsvpStep === 1 && (
-                    <div className="space-y-6">
+                    <div className="space-y-6 animate-slide-right">
                       <div className="space-y-2">
-                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Full Name</label>
-                        <input name="fullName" required placeholder="John Doe" className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-teal-500 outline-none" />
+                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Full Name</label>
+                        <input required name="fullName" placeholder="John & Jane Doe" className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-teal-500 outline-none transition-all text-lg" />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Phone Number</label>
-                        <input name="phone" required placeholder="+27 XX XXX XXXX" className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-teal-500 outline-none" />
+                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
+                        <input required name="email" type="email" placeholder="jane@example.com" className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-teal-500 outline-none transition-all text-lg" />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Email Address</label>
-                        <input name="email" type="email" required placeholder="john@example.com" className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-teal-500 outline-none" />
+                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Phone Number (WhatsApp)</label>
+                        <input required name="phone" placeholder="+27 79 000 0000" className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-teal-500 outline-none transition-all text-lg" />
                       </div>
-                      <button type="button" onClick={() => setRsvpStep(2)} className="w-full bg-teal-600 text-white font-bold py-5 rounded-2xl shadow-xl shadow-teal-600/20 flex items-center justify-center space-x-2">
-                        <span>Continue</span> <ChevronRight size={20} />
+                      <button type="button" onClick={() => setRsvpStep(2)} className="w-full bg-slate-900 text-white font-bold py-5 rounded-2xl shadow-xl hover:bg-teal-600 transition-all active:scale-95 flex items-center justify-center">
+                        Next Step
+                        <ChevronRight className="ml-2" size={20} />
                       </button>
                     </div>
                   )}
+
                   {rsvpStep === 2 && (
-                    <div className="space-y-6">
+                    <div className="space-y-6 animate-slide-right">
                       <div className="space-y-2">
-                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Accommodation</label>
-                        <select name="accommodation" required className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-teal-500 outline-none">
-                          {schedule.map(s => <option key={s.id} value={s.location}>{s.location}</option>)}
+                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Your Accommodation</label>
+                        <select required name="accommodation" className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-teal-500 outline-none transition-all text-lg appearance-none">
+                          <option value="">Select lodge...</option>
+                          {LODGES.map((name, i) => <option key={i} value={name}>{name}</option>)}
+                          <option value="Other">Other (Not listed)</option>
                         </select>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Guest Count</label>
-                          <input name="guestCount" type="number" defaultValue={1} min={1} className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 outline-none" />
+                          <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Guest Count</label>
+                          <select required name="guestCount" className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-teal-500 outline-none transition-all text-lg">
+                            {[1,2,3,4,5,6,7,8].map(n => <option key={n} value={n}>{n}</option>)}
+                          </select>
                         </div>
                         <div className="space-y-2">
-                          <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Airport Transfer</label>
-                          <select name="airportTransfer" className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 outline-none">
-                            <option value="No">No</option><option value="Yes">Yes</option>
+                          <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Airport Transfer?</label>
+                          <select required name="airportTransfer" className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-teal-500 outline-none transition-all text-lg">
+                            <option value="no">No</option>
+                            <option value="yes">Yes, please contact me</option>
                           </select>
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Preferred Pickup Window</label>
-                        <input name="pickupWindow" placeholder="e.g. 1:45 PM - 2:45 PM" className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 outline-none" />
+                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Preferred Pickup Window</label>
+                        <input name="pickupWindow" defaultValue="1:45 PM - 2:45 PM" readOnly className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 text-slate-400 font-medium text-lg" />
                       </div>
-                      <div className="flex space-x-4">
-                        <button type="button" onClick={() => setRsvpStep(1)} className="flex-grow bg-slate-100 text-slate-600 font-bold py-5 rounded-2xl">Back</button>
-                        <button type="submit" className="flex-[2] bg-teal-600 text-white font-bold py-5 rounded-2xl shadow-xl shadow-teal-600/20">Submit RSVP</button>
+                      <div className="flex gap-4">
+                        <button type="button" onClick={() => setRsvpStep(1)} className="flex-1 bg-slate-100 text-slate-600 font-bold py-5 rounded-2xl hover:bg-slate-200 transition-all">Back</button>
+                        <button type="submit" className="flex-[2] bg-teal-600 text-white font-bold py-5 rounded-2xl shadow-xl shadow-teal-600/20 hover:bg-teal-700 transition-all active:scale-95">Complete RSVP</button>
                       </div>
                     </div>
                   )}
@@ -573,113 +694,90 @@ const WeddingPortal = () => {
           </div>
         </section>
 
-        {/* Experience Elgin Gallery */}
-        <section>
-          <div className="text-center mb-12"><h2 className="text-3xl font-bold text-slate-800 mb-4">Experience Elgin</h2><p className="text-slate-500 font-light text-lg">Make the most of your wedding weekend with our premium tours</p></div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {[
-              { t: 'Wine Tours', i: '/oats_logos.jpg' },
-              { t: 'Hermanus Coastal', i: '/dark_blue_photographic_conference_event_website_(4).jpg' },
-              { t: 'Penguin Tour', i: '/6661c48f09e1d4261d646875488c7507.jpg' },
-              { t: 'Table Mountain', i: '/453884004_1034192472040145_1496321644556200388_n_(1).jpg' },
-              { t: 'V&A Waterfront', i: '/453884004_1034192472040145_1496321644556200388_n_(1) copy.jpg' }
-            ].map((exp, idx) => (
-              <div key={idx} className="group relative overflow-hidden rounded-[2rem] aspect-[4/5] shadow-sm hover:shadow-xl transition-all hover:-translate-y-2">
-                <img src={exp.i} alt={exp.t} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-6">
-                  <h3 className="text-white font-bold text-sm mb-4">{exp.t}</h3>
-                  <a href={`mailto:${details.contactEmail}`} className="bg-white/20 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest py-2.5 rounded-xl text-center border border-white/30 hover:bg-white hover:text-teal-900 transition-colors">Enquire Now</a>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Return Schedule */}
-        <section className="bg-white rounded-[2.5rem] p-10 md:p-16 border border-slate-100 shadow-sm relative overflow-hidden group">
-          <div className="relative z-10 max-w-2xl">
-            <h2 className="text-3xl font-bold text-slate-800 mb-8 flex items-center"><Bus className="mr-3 text-teal-600" size={32} />Evening Return Shuttles</h2>
-            <div className="grid gap-4">
-              {details.receptionDepartureTimes.map((item) => (
-                <div key={item.id} className="flex items-center justify-between p-6 bg-slate-50 rounded-3xl border border-slate-100 hover:bg-teal-50/50 transition-all">
-                  <span className="text-slate-700 font-bold text-lg">{item.label}</span>
-                  <span className="text-teal-600 font-black text-2xl tracking-tighter">{item.time}</span>
+        {/* Info Grid */}
+        <section className="grid md:grid-cols-3 gap-8">
+          <div className="bg-white p-10 rounded-[2.5rem] shadow-lg border border-slate-100 group hover:shadow-2xl transition-all duration-500">
+            <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform"><Clock size={32}/></div>
+            <h3 className="text-2xl font-bold text-slate-800 mb-4">Evening Shuttles</h3>
+            <p className="text-slate-500 font-light leading-relaxed mb-6">Returns depart Rockhaven at the following times:</p>
+            <div className="space-y-3">
+              {details.receptionDepartureTimes.map(time => (
+                <div key={time.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
+                  <span className="font-bold text-slate-700">{time.label}</span>
+                  <span className="bg-white px-3 py-1 rounded-lg text-sm font-black text-slate-900 border border-slate-100">{time.time}</span>
                 </div>
               ))}
             </div>
-            <div className="mt-10 p-6 bg-amber-50 rounded-[2rem] border border-amber-100 flex items-start space-x-4">
-              <Info className="text-amber-500 flex-shrink-0 mt-1" size={24} />
-              <p className="text-amber-800 leading-relaxed font-medium">Please coordinate with the transport concierge desk at Rockhaven to confirm your preferred departure time.</p>
+          </div>
+
+          <div className="bg-white p-10 rounded-[2.5rem] shadow-lg border border-slate-100 group hover:shadow-2xl transition-all duration-500">
+            <div className="w-16 h-16 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform"><Info size={32}/></div>
+            <h3 className="text-2xl font-bold text-slate-800 mb-4">Travel Tips</h3>
+            <ul className="space-y-4 text-slate-500 font-light leading-relaxed">
+              <li className="flex items-start"><ChevronRight size={18} className="mr-2 mt-1 text-teal-500 flex-shrink-0" /><span>Elgin Valley roads can be winding; please allow extra time if driving.</span></li>
+              <li className="flex items-start"><ChevronRight size={18} className="mr-2 mt-1 text-teal-500 flex-shrink-0" /><span>The shuttle is free for all wedding guests.</span></li>
+              <li className="flex items-start"><ChevronRight size={18} className="mr-2 mt-1 text-teal-500 flex-shrink-0" /><span>Need special assistance? Contact our team via the details below.</span></li>
+            </ul>
+          </div>
+
+          <div className="bg-white p-10 rounded-[2.5rem] shadow-lg border border-slate-100 group hover:shadow-2xl transition-all duration-500">
+            <div className="w-16 h-16 bg-teal-50 text-teal-500 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform"><Phone size={32}/></div>
+            <h3 className="text-2xl font-bold text-slate-800 mb-4">Support</h3>
+            <p className="text-slate-500 font-light leading-relaxed mb-8">For immediate assistance or to book a private transfer:</p>
+            <div className="space-y-4">
+              <a href={`https://wa.me/${details.contactWhatsApp.replace(/\s/g, '')}`} className="flex items-center p-5 bg-teal-50 text-teal-700 rounded-2xl font-bold hover:bg-teal-100 transition-all border border-teal-100">
+                <div className="bg-white p-2 rounded-lg mr-4"><Phone size={18}/></div>
+                {details.contactWhatsApp}
+              </a>
+              <a href={`mailto:${details.contactEmail}`} className="flex items-center p-5 bg-slate-50 text-slate-600 rounded-2xl font-bold hover:bg-slate-100 transition-all border border-slate-100">
+                <div className="bg-white p-2 rounded-lg mr-4"><Mail size={18}/></div>
+                {details.contactEmail}
+              </a>
             </div>
           </div>
-          <div className="absolute top-0 right-0 p-20 text-slate-50 opacity-10 group-hover:scale-110 transition-transform pointer-events-none"><Bus size={400} /></div>
         </section>
 
         {/* FAQ Section */}
-        <section className="bg-white rounded-[2.5rem] p-10 md:p-16 border border-slate-100 shadow-sm">
-          <h2 className="text-3xl font-bold text-slate-800 mb-12 text-center">Important Information</h2>
-          <div className="max-w-3xl mx-auto space-y-4">
-            {[
-              { q: 'What should I wear in Elgin weather?', a: 'Elgin can become cold in the evening. We recommend bringing a light jacket for the journey home.' },
-              { q: 'Is Uber available?', a: 'No Uber services operate in the region. Please ensure you do not miss your scheduled shuttle.' },
-              { q: 'What happens if I miss my shuttle?', a: 'Please contact our transport coordinator immediately at the numbers listed below.' },
-              { q: 'Punctuality', a: 'Please be ready 5 minutes before your scheduled pickup time. Shuttles must depart on schedule to ensure everyone arrives for the ceremony.' }
-            ].map((faq, i) => (
-              <div key={i} className="border border-slate-100 rounded-[1.5rem] overflow-hidden">
-                <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full px-8 py-6 flex items-center justify-between text-left hover:bg-slate-50 transition-colors">
-                  <span className="font-bold text-slate-700">{faq.q}</span>
-                  <ChevronDown className={`text-slate-400 transition-transform ${openFaq === i ? 'rotate-180 text-teal-500' : ''}`} />
-                </button>
-                {openFaq === i && <div className="px-8 pb-6 text-slate-500 font-light leading-relaxed border-t border-slate-50 pt-4 animate-fade-in-down">{faq.a}</div>}
-              </div>
-            ))}
+        <section className="bg-slate-900 rounded-[3rem] p-10 md:p-16 text-white overflow-hidden relative">
+          <div className="relative z-10 max-w-4xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-black mb-12 text-center">Frequently Asked Questions</h2>
+            <div className="space-y-4">
+              {[
+                { q: "Is there parking at the venue?", a: "Yes, there is secure parking available at Rockhaven for those who wish to drive." },
+                { q: "What if I miss my shuttle?", a: "Please contact our dispatcher immediately at the WhatsApp number provided. We will do our best to accommodate you on a later shuttle if possible." },
+                { q: "Can I bring my children on the shuttle?", a: "Yes, children are welcome. Please ensure they are included in your guest count when RSVPing." }
+              ].map((faq, i) => (
+                <div key={i} className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+                  <button 
+                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                    className="w-full p-6 text-left flex items-center justify-between hover:bg-white/5 transition-colors"
+                  >
+                    <span className="font-bold text-lg">{faq.q}</span>
+                    <ChevronDown className={`transition-transform duration-300 ${openFaq === i ? 'rotate-180 text-teal-400' : ''}`} />
+                  </button>
+                  {openFaq === i && (
+                    <div className="p-6 pt-0 text-slate-400 font-light leading-relaxed border-t border-white/5 animate-fade-in">
+                      {faq.a}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="absolute top-0 right-0 p-20 text-white/5 pointer-events-none">
+            <Info size={400} />
           </div>
         </section>
 
-        {/* Contact Assistance */}
-        <section className="bg-teal-900 rounded-[3rem] p-12 md:p-20 text-white relative overflow-hidden shadow-2xl">
-          <div className="relative z-10 grid md:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-5xl font-bold mb-8 tracking-tight">Need Assistance?</h2>
-              <p className="text-teal-100/70 text-xl font-light mb-12 leading-relaxed">Our transport coordinator, Adam Jantjies, is available 24/7 to assist with any queries.</p>
-              <div className="space-y-8">
-                <div className="flex items-center space-x-8 group">
-                  <div className="bg-white/10 p-5 rounded-[2rem] border border-white/10 group-hover:bg-teal-500 transition-all"><Phone size={28} /></div>
-                  <div><p className="text-xs font-black text-teal-400 uppercase tracking-[0.2em] mb-1">Call / WhatsApp</p><p className="text-2xl font-bold">079 503 6849 / 066 233 4928</p></div>
-                </div>
-                <div className="flex items-center space-x-8 group">
-                  <div className="bg-white/10 p-5 rounded-[2rem] border border-white/10 group-hover:bg-teal-500 transition-all"><Mail size={28} /></div>
-                  <div><p className="text-xs font-black text-teal-400 uppercase tracking-[0.2em] mb-1">Email</p><p className="text-2xl font-bold">Adam@overbergtransfers.com</p></div>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white/5 rounded-[3rem] p-12 border border-white/10 backdrop-blur-xl">
-              <div className="bg-teal-500 w-16 h-16 rounded-2xl flex items-center justify-center mb-8 shadow-lg shadow-teal-500/20"><Users size={32} /></div>
-              <h3 className="font-bold text-3xl mb-6">Adam Jantjies</h3>
-              <p className="text-teal-50/80 text-lg font-light leading-relaxed italic">"Looking forward to getting everyone safely to and from this special day!"</p>
-            </div>
+        {/* Footer */}
+        <footer className="text-center py-12 border-t border-slate-200">
+          <div className="flex items-center justify-center space-x-2 text-slate-400 font-bold uppercase tracking-[0.4em] text-[10px] mb-4">
+            <Bus size={12}/>
+            <span>Overberg Transfers & Tours</span>
           </div>
-          <div className="absolute top-0 right-0 p-20 text-white/5 pointer-events-none translate-x-1/2 -translate-y-1/2"><Bus size={800} /></div>
-        </section>
+          <p className="text-slate-300 text-[10px] font-medium">&copy; 2026 Rockhaven Wedding Transport Coordination. All rights reserved.</p>
+        </footer>
       </main>
-
-      <footer className="py-16 text-center border-t border-slate-200">
-        <div className="flex items-center justify-center space-x-3 mb-6 opacity-30">
-          <Bus size={24} className="text-slate-800" /><span className="font-black text-slate-800 tracking-tighter text-lg">GETT OVERBERG TRANSFERS</span>
-        </div>
-        <p className="text-slate-400 text-xs font-black uppercase tracking-[0.4em]">© 2026 Premium Transport Logistics</p>
-      </footer>
-
-      <style>{`
-        @keyframes subtle-zoom { from { transform: scale(1); } to { transform: scale(1.05); } }
-        @keyframes fade-in-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fade-in-down { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-        .animate-subtle-zoom { animation: subtle-zoom 20s infinite alternate ease-in-out; }
-        .animate-fade-in-up { animation: fade-in-up 0.8s ease-out forwards; }
-        .animate-fade-in-down { animation: fade-in-down 0.3s ease-out forwards; }
-        .animate-fade-in { animation: fade-in 1s ease-out forwards; }
-      `}</style>
     </div>
   );
 };
