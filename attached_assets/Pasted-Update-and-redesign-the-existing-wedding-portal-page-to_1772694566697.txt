@@ -1,0 +1,352 @@
+Update and redesign the existing wedding portal page to create a modern, premium, mobile-first Wedding Transport Portal for international guests attending the Rockhaven Wedding in Elgin Valley.
+
+The page must remain 100% frontend only.
+
+No backend
+No database
+No APIs
+No server processing
+
+Use only:
+
+HTML
+
+CSS
+
+Vanilla JavaScript
+
+The design must feel premium, elegant, and trustworthy because international guests will use it.
+
+The page must load fast and work perfectly on mobile devices.
+
+Page Route
+
+The page should remain:
+
+/rockhaven-wedding.html
+
+Structure the code clearly with comments so the page can easily be duplicated for future weddings.
+
+Visual Design Requirements
+
+Create a fresh modern UI.
+
+Design style should include:
+
+Elegant typography
+
+Soft shadows
+
+Rounded cards
+
+Smooth transitions
+
+Professional spacing
+
+Mobile-first layout
+
+Clean white background
+
+Soft green accent color
+
+Neutral luxury tones
+
+Use beautiful landscape imagery of Elgin Valley, vineyards, and wedding venues.
+
+Images should appear in:
+
+Hero background
+
+Experience Elgin gallery
+
+Section dividers
+
+Use responsive image layouts.
+
+Section 1 — Hero Section
+
+Create a full-width hero section with a beautiful Elgin vineyard or mountain background image.
+
+Overlay with subtle gradient.
+
+Content centered:
+
+Heading:
+Rockhaven Wedding Transport Portal
+
+Subtext:
+Your official source for shuttle schedules and guest transport information for the Rockhaven Wedding in Elgin Valley.
+
+Display key event details:
+
+Wedding Date
+Saturday 4 April 2026
+
+Ceremony Start
+3:00 PM
+
+Location
+Rockhaven, Elgin Valley
+
+Add smooth entrance animation.
+
+Section 2 — Secure Access Gate
+
+Create a modern login card centered on the page.
+
+Card contains:
+
+Password input
+Placeholder: Enter Wedding Access Code
+
+Button:
+Enter Portal
+
+Hidden error message.
+
+Correct access code:
+
+OATS2026
+
+Functionality:
+
+When correct:
+
+Hide login card
+
+Reveal portal content
+
+Save access using localStorage
+
+key: weddingAccess
+value: granted
+
+When page loads:
+
+If access already granted → skip login.
+
+If incorrect code entered:
+
+Display error text:
+
+Incorrect access code.
+
+Section 3 — Shuttle Status Banner
+
+At the top of the portal content include a transport status banner.
+
+Default message:
+
+All shuttles are currently on time. Afternoon pickups begin between 1:45 PM and 2:45 PM.
+
+Style:
+
+Soft green background
+
+Rounded edges
+
+Easy to edit manually later.
+
+Section 4 — Interactive Shuttle Schedule
+
+Create an interactive lodge lookup tool.
+
+Add dropdown:
+
+Label:
+Find Your Shuttle Pickup Time
+
+Dropdown options:
+
+Rockhaven Lodge
+Elgin Valley Inn
+Orchard Guest House
+
+Store shuttle schedule in a JavaScript array.
+
+Example data:
+
+Rockhaven Lodge — 1:45 PM
+Elgin Valley Inn — 2:15 PM
+Orchard Guest House — 2:30 PM
+
+When user selects their lodge:
+
+Display pickup time in a highlighted card.
+
+Add smooth fade animation.
+
+Make layout mobile-friendly.
+
+Section 5 — Return Shuttle Schedule
+
+Create a visually clear schedule card.
+
+Title:
+
+Evening Return Shuttles
+
+Display:
+
+10:00 PM — Early Bird Shuttle
+12:00 AM — Party Shuttle
+01:00 AM — Final Shuttle
+
+Add icon or visual indicator.
+
+Include note:
+
+Please coordinate with the transport concierge desk at Rockhaven to confirm your departure.
+
+Section 6 — Airport Transfer Request
+
+Create a clean form.
+
+Fields:
+
+Full Name
+Email
+Flight Number
+Arrival Time
+Number of Guests
+
+Frontend only behavior.
+
+On submit:
+
+Prevent page reload.
+
+Display confirmation message:
+
+Thank you. Your transfer request has been received. Our team will contact you shortly.
+
+Do not store or send data.
+
+Section 7 — Experience Elgin Gallery
+
+Create a premium image card gallery.
+
+Each card includes image, title and button.
+
+Experiences:
+
+Wine Tasting Tours
+Hermanus Coastal Tour
+Penguin Tour at Betty’s Bay
+Table Mountain Sightseeing
+V&A Waterfront Visit
+
+Each card includes:
+
+Button:
+Enquire Now
+
+Button should link to:
+
+mailto:Adam@overbergtransfers.com
+
+Add hover animations.
+
+Section 8 — Wedding Weekend Events
+
+Create cards for additional events.
+
+Friday 3 April
+Meet & Greet
+
+Location options:
+Elgin Railway Market
+Elgin Grabouw Country Club
+
+Start time:
+5:00 PM
+
+Sunday 5 April
+Recovery Breakfast
+
+Locations include:
+
+Peregrine Farm Stall
+Orchard Farm Stall
+South Hill Restaurant
+Houwhoek Hotel
+
+Section 9 — FAQ Section
+
+Create accordion style FAQ.
+
+Questions:
+
+What should I wear in Elgin weather?
+
+Answer:
+Elgin can become cold in the evening. We recommend bringing a light jacket.
+
+Is Uber available?
+
+Answer:
+No Uber services operate in the region. Please make sure you do not miss your scheduled shuttle.
+
+What happens if I miss my shuttle?
+
+Answer:
+Please contact the transport coordinator immediately.
+
+Who do I contact for assistance?
+
+Answer:
+
+Adam Jantjies
+Phone / WhatsApp
+079 503 6849
+066 233 4928
+
+Email
+Adam@overbergtransfers.com
+
+Section 10 — Contact & Assistance
+
+Create a final contact section.
+
+Include:
+
+Transport Coordinator
+Adam Jantjies
+
+Phone numbers
+Email
+
+Include WhatsApp icon and phone icon.
+
+JavaScript Structure
+
+At the top of the JS file include editable variables:
+
+ACCESS_CODE
+SHUTTLE_DATA
+STATUS_MESSAGE
+
+Ensure all functionality is commented clearly.
+
+Performance
+
+Ensure page:
+
+loads quickly
+
+images are optimized
+
+animations are smooth
+
+layout works perfectly on mobile devices
+
+Final Goal
+
+The page must:
+
+Look premium and professional
+Be easy for guests to use
+Replace static PDF schedules
+Provide clear transport logistics
+Remain completely frontend only
+Be reusable for future weddings
