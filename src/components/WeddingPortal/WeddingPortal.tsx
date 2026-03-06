@@ -59,6 +59,7 @@ interface WeddingDetails {
   contactWhatsApp: string;
   contactEmail: string;
   shuttleStatus: string;
+  lodgeTimes: Record<string, { afternoon: string; evening: string }>;
 }
 
 const LODGES = [
@@ -82,7 +83,7 @@ const LODGES = [
   "Inn On Highlands"
 ];
 
-const LODGE_TIMES: Record<string, { afternoon: string; evening: string }> = {
+const DEFAULT_LODGE_TIMES: Record<string, { afternoon: string; evening: string }> = {
   "Elgin River Lodge": { afternoon: "1:45 PM", evening: "6:00 PM" },
   "33 Viljoenshoop Road": { afternoon: "2:00 PM", evening: "6:15 PM" },
   "Lavendar Cottages": { afternoon: "2:10 PM", evening: "6:25 PM" },
@@ -127,21 +128,29 @@ const WeddingPortal = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   // Data State
-  const [details] = useState<WeddingDetails>({
-    contactWhatsApp: '079 503 6849',
-    contactEmail: 'Adam@overbergtransfers.com',
-    shuttleStatus: 'All shuttles are currently on time. Please be ready 10 minutes before your pickup.'
+  const [details, setDetails] = useState<WeddingDetails>(() => {
+    const saved = localStorage.getItem('wedding_details_v3_persistent');
+    return saved ? JSON.parse(saved) : {
+      contactWhatsApp: '079 503 6849',
+      contactEmail: 'Adam@overbergtransfers.com',
+      shuttleStatus: 'All shuttles are currently on time. Please be ready 10 minutes before your pickup.',
+      lodgeTimes: DEFAULT_LODGE_TIMES
+    };
   });
 
   const [bookings, setBookings] = useState<Booking[]>(() => {
-    const saved = localStorage.getItem('wedding_local_bookings_v3');
+    const saved = localStorage.getItem('wedding_local_bookings_v3_persistent');
     return saved ? JSON.parse(saved) : [];
   });
 
   // Persistence
   useEffect(() => {
-    localStorage.setItem('wedding_local_bookings_v3', JSON.stringify(bookings));
+    localStorage.setItem('wedding_local_bookings_v3_persistent', JSON.stringify(bookings));
   }, [bookings]);
+
+  useEffect(() => {
+    localStorage.setItem('wedding_details_v3_persistent', JSON.stringify(details));
+  }, [details]);
 
   useEffect(() => {
     if (localStorage.getItem('weddingAccess') === 'granted') setIsGuestLoggedIn(true);
@@ -230,6 +239,19 @@ const WeddingPortal = () => {
     link.click();
   };
 
+  const handleTimeChange = (lodge: string, type: 'afternoon' | 'evening', time: string) => {
+    setDetails(prev => ({
+      ...prev,
+      lodgeTimes: {
+        ...prev.lodgeTimes,
+        [lodge]: {
+          ...prev.lodgeTimes[lodge],
+          [type]: time
+        }
+      }
+    }));
+  };
+
   const clearData = () => {
     if (window.confirm("Are you sure you want to clear all booking data?")) {
       setBookings([]);
@@ -309,38 +331,41 @@ const WeddingPortal = () => {
               <table className="w-full text-left">
                 <thead className="bg-slate-50 text-[10px] uppercase font-black tracking-widest text-slate-400 border-b border-slate-100">
                   <tr>
-                    <th className="p-6">Guest</th>
-                    <th className="p-6">Contact</th>
-                    <th className="p-6">Accommodation</th>
-                    <th className="p-6 text-center">Count</th>
-                    <th className="p-6">Shuttle</th>
-                    <th className="p-6">Services</th>
+                    <th className="p-6">Lodge</th>
+                    <th className="p-6">Afternoon Pickup</th>
+                    <th className="p-6">Evening Pickup</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                  {bookings.filter(b => b.fullName.toLowerCase().includes(searchTerm.toLowerCase())).map((b, i) => (
-                    <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                  {LODGES.map(l => (
+                    <tr key={l}>
+                      <td className="p-6 font-bold text-slate-800">{l}</td>
                       <td className="p-6">
-                        <div className="font-bold text-slate-800">{b.fullName} {b.surname}</div>
-                        <div className="text-[10px] text-slate-400 mt-1">{b.passengers.map(p => `${p.firstName} ${p.lastName}`).join(', ')}</div>
+                        <input 
+                          type="text" 
+                          value={details.lodgeTimes[l]?.afternoon || ''} 
+                          onChange={e => handleTimeChange(l, 'afternoon', e.target.value)}
+                          className="bg-white border border-slate-200 rounded px-3 py-1 text-sm focus:border-teal-500 outline-none w-32"
+                        />
                       </td>
                       <td className="p-6">
-                        <div className="text-sm text-slate-600">{b.email}</div>
-                        <div className="text-xs text-slate-400">{b.phone}</div>
-                      </td>
-                      <td className="p-6 text-sm font-medium text-slate-700">{b.accommodation === 'Other' ? b.customAccommodation : b.accommodation}</td>
-                      <td className="p-6 text-center"><span className="bg-teal-50 text-teal-700 px-3 py-1 rounded-lg text-xs font-bold">{b.guestCount}</span></td>
-                      <td className="p-6"><span className="text-xs font-bold uppercase tracking-widest text-slate-500">{b.shuttleChoice}</span></td>
-                      <td className="p-6">
-                        <div className="flex flex-wrap gap-1">
-                          {b.additionalServices.map((s, si) => <span key={si} className="text-[8px] font-bold uppercase bg-slate-100 px-2 py-0.5 rounded text-slate-500">{s}</span>)}
-                        </div>
+                        <input 
+                          type="text" 
+                          value={details.lodgeTimes[l]?.evening || ''} 
+                          onChange={e => handleTimeChange(l, 'evening', e.target.value)}
+                          className="bg-white border border-slate-200 rounded px-3 py-1 text-sm focus:border-teal-500 outline-none w-32"
+                        />
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+
+            <div className="p-6 bg-slate-50 border-t border-slate-100">
+              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Guest Bookings</h3>
+            </div>
+            <div className="overflow-x-auto">
           </div>
         </main>
       </div>
@@ -551,18 +576,18 @@ const WeddingPortal = () => {
             <ChevronDown className="absolute right-8 top-1/2 -translate-y-1/2 text-teal-500 pointer-events-none" />
           </div>
 
-          {selectedFinderLodge && LODGE_TIMES[selectedFinderLodge] && (
+          {selectedFinderLodge && details.lodgeTimes[selectedFinderLodge] && (
             <div className="grid md:grid-cols-2 gap-8 animate-fade-in-up">
               <div className="bg-teal-50 p-10 rounded-[2.5rem] border border-teal-100 group hover:shadow-2xl transition-all duration-500">
                 <Sun className="mx-auto text-teal-500 mb-4" size={32} />
                 <p className="text-[10px] font-black uppercase tracking-widest text-teal-600 mb-2">Afternoon Shuttle</p>
-                <h4 className="text-5xl font-black text-teal-900 mb-2">{LODGE_TIMES[selectedFinderLodge].afternoon}</h4>
+                <h4 className="text-5xl font-black text-teal-900 mb-2">{details.lodgeTimes[selectedFinderLodge].afternoon}</h4>
                 <div className="flex items-center justify-center text-teal-700 font-bold text-sm"><CheckCircle size={14} className="mr-2"/> On Time</div>
               </div>
               <div className="bg-slate-900 p-10 rounded-[2.5rem] text-white group hover:shadow-2xl transition-all duration-500">
                 <Clock className="mx-auto text-teal-400 mb-4" size={32} />
                 <p className="text-[10px] font-black uppercase tracking-widest text-teal-400 mb-2">Evening Shuttle</p>
-                <h4 className="text-5xl font-black text-white mb-2">{LODGE_TIMES[selectedFinderLodge].evening}</h4>
+                <h4 className="text-5xl font-black text-white mb-2">{details.lodgeTimes[selectedFinderLodge].evening}</h4>
                 <div className="flex items-center justify-center text-slate-400 font-bold text-sm"><CheckCircle size={14} className="mr-2"/> Live Status</div>
               </div>
             </div>
@@ -595,8 +620,8 @@ const WeddingPortal = () => {
                   {LODGES.map(l => (
                     <tr key={l} className="hover:bg-white/5 transition-colors group">
                       <td className="p-8 font-bold text-slate-200 group-hover:text-white">{l}</td>
-                      <td className="p-8"><span className="bg-teal-500/10 text-teal-400 px-4 py-1 rounded-full text-xs font-bold">{LODGE_TIMES[l]?.afternoon || 'TBC'}</span></td>
-                      <td className="p-8 text-right"><span className="bg-white/10 text-white px-4 py-1 rounded-full text-xs font-bold">{LODGE_TIMES[l]?.evening || 'TBC'}</span></td>
+                      <td className="p-8"><span className="bg-teal-500/10 text-teal-400 px-4 py-1 rounded-full text-xs font-bold">{details.lodgeTimes[l]?.afternoon || 'TBC'}</span></td>
+                      <td className="p-8 text-right"><span className="bg-white/10 text-white px-4 py-1 rounded-full text-xs font-bold">{details.lodgeTimes[l]?.evening || 'TBC'}</span></td>
                     </tr>
                   ))}
                 </tbody>
@@ -713,6 +738,20 @@ const WeddingPortal = () => {
              <a href="#" className="hover:text-teal-600 transition-colors"><Mail size={20}/></a>
              <a href="#" className="hover:text-teal-600 transition-colors"><Phone size={20}/></a>
              <a href="#" className="hover:text-teal-600 transition-colors"><MapPin size={20}/></a>
+          </div>
+
+          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <img src="/assets/img1.jpg" alt="Briefing 1" className="rounded-xl shadow-lg w-full h-auto object-cover aspect-[2/3]" />
+            <img src="/assets/img2.jpg" alt="Briefing 2" className="rounded-xl shadow-lg w-full h-auto object-cover aspect-[2/3]" />
+            <img src="/assets/img3.jpg" alt="Briefing 3" className="rounded-xl shadow-lg w-full h-auto object-cover aspect-[2/3]" />
+            <img src="/assets/img4.jpg" alt="Briefing 4" className="rounded-xl shadow-lg w-full h-auto object-cover aspect-[2/3]" />
+            <img src="/assets/img5.jpg" alt="Briefing 5" className="rounded-xl shadow-lg w-full h-auto object-cover aspect-[2/3]" />
+            <img src="/assets/img6.jpg" alt="Briefing 6" className="rounded-xl shadow-lg w-full h-auto object-cover aspect-[2/3]" />
+            <img src="/assets/img7.jpg" alt="Briefing 7" className="rounded-xl shadow-lg w-full h-auto object-cover aspect-[2/3]" />
+            <img src="/assets/img8.jpg" alt="Briefing 8" className="rounded-xl shadow-lg w-full h-auto object-cover aspect-[2/3]" />
+            <img src="/assets/img9.jpg" alt="Briefing 9" className="rounded-xl shadow-lg w-full h-auto object-cover aspect-[2/3]" />
+            <img src="/assets/img10.jpg" alt="Briefing 10" className="rounded-xl shadow-lg w-full h-auto object-cover aspect-[2/3]" />
+            <img src="/assets/img11.jpg" alt="Briefing 11" className="rounded-xl shadow-lg w-full h-auto object-cover aspect-[2/3]" />
           </div>
         </div>
       </footer>
