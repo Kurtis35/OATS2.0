@@ -127,6 +127,8 @@ const WeddingPortal = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
   // Data State
   const [details, setDetails] = useState<WeddingDetails>(() => {
     const saved = localStorage.getItem('wedding_details_v3_persistent');
@@ -312,6 +314,12 @@ const WeddingPortal = () => {
               <Shield className="mr-2 text-teal-400" /> Admin Dashboard
             </h1>
             <div className="flex space-x-4">
+              <button 
+                onClick={() => navigate('/')} 
+                className="bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold flex items-center hover:bg-slate-700 transition-colors"
+              >
+                <Home size={16} className="mr-2"/> Home
+              </button>
               <button onClick={downloadCSV} className="bg-teal-600 px-4 py-2 rounded-lg text-sm font-bold flex items-center"><Download size={16} className="mr-2"/> Export CSV</button>
               <button onClick={clearData} className="bg-red-600 px-4 py-2 rounded-lg text-sm font-bold flex items-center"><Trash2 size={16} className="mr-2"/> Clear All</button>
               <button onClick={handleLogout} className="text-slate-400 hover:text-white"><LogOut /></button>
@@ -775,19 +783,69 @@ const WeddingPortal = () => {
              <a href="#" className="hover:text-teal-600 transition-colors"><MapPin size={20}/></a>
           </div>
 
-          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4">
-            <img src="/assets/img1.jpg" alt="Briefing 1" className="rounded-xl shadow-lg w-full h-auto object-cover aspect-[2/3]" />
-            <img src="/assets/img2.jpg" alt="Briefing 2" className="rounded-xl shadow-lg w-full h-auto object-cover aspect-[2/3]" />
-            <img src="/assets/img3.jpg" alt="Briefing 3" className="rounded-xl shadow-lg w-full h-auto object-cover aspect-[2/3]" />
-            <img src="/assets/img4.jpg" alt="Briefing 4" className="rounded-xl shadow-lg w-full h-auto object-cover aspect-[2/3]" />
-            <img src="/assets/img5.jpg" alt="Briefing 5" className="rounded-xl shadow-lg w-full h-auto object-cover aspect-[2/3]" />
-            <img src="/assets/img6.jpg" alt="Briefing 6" className="rounded-xl shadow-lg w-full h-auto object-cover aspect-[2/3]" />
-            <img src="/assets/img7.jpg" alt="Briefing 7" className="rounded-xl shadow-lg w-full h-auto object-cover aspect-[2/3]" />
-            <img src="/assets/img8.jpg" alt="Briefing 8" className="rounded-xl shadow-lg w-full h-auto object-cover aspect-[2/3]" />
-            <img src="/assets/img9.jpg" alt="Briefing 9" className="rounded-xl shadow-lg w-full h-auto object-cover aspect-[2/3]" />
-            <img src="/assets/img10.jpg" alt="Briefing 10" className="rounded-xl shadow-lg w-full h-auto object-cover aspect-[2/3]" />
-            <img src="/assets/img11.jpg" alt="Briefing 11" className="rounded-xl shadow-lg w-full h-auto object-cover aspect-[2/3]" />
+          <div className="mt-16">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-xl font-serif italic text-slate-900">Wedding Gallery</h3>
+              <div className="flex items-center space-x-4">
+                <button 
+                  onClick={() => navigate('/')} 
+                  className="flex items-center space-x-2 px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200 transition-all text-sm font-bold text-slate-600"
+                >
+                  <Home size={16} />
+                  <span>Home</span>
+                </button>
+                <button 
+                  onClick={handleLogout}
+                  className="flex items-center space-x-2 px-4 py-2 rounded-full bg-red-50 hover:bg-red-100 transition-all text-sm font-bold text-red-600"
+                >
+                  <LogOut size={16} />
+                  <span>Exit</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[1,2,3,4,5,6,7,8,9,10,11].map(i => (
+                <div 
+                  key={i} 
+                  className="group relative aspect-[2/3] overflow-hidden rounded-2xl cursor-pointer shadow-md hover:shadow-xl transition-all duration-300"
+                  onClick={() => setSelectedImage(`/assets/img${i}.jpg`)}
+                >
+                  <img 
+                    src={`/assets/img${i}.jpg`} 
+                    alt={`Briefing ${i}`} 
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                  />
+                  <div className="absolute inset-0 bg-teal-900/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                    <div className="bg-white/90 p-3 rounded-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                      <Search className="text-teal-600" size={20} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
+
+          {/* Full Image Modal */}
+          {selectedImage && (
+            <div 
+              className="fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-md flex items-center justify-center p-4 md:p-12 animate-fade-in"
+              onClick={() => setSelectedImage(null)}
+            >
+              <button 
+                className="absolute top-8 right-8 text-white/50 hover:text-white transition-colors bg-white/10 p-3 rounded-full hover:bg-white/20"
+                onClick={() => setSelectedImage(null)}
+              >
+                <LogOut size={24} className="rotate-90" />
+              </button>
+              <img 
+                src={selectedImage} 
+                alt="Full size" 
+                className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl border border-white/10"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          )}
         </div>
       </footer>
     </div>

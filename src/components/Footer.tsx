@@ -158,6 +158,9 @@ const Footer = () => {
             <p className="text-gray-400 text-xs md:text-sm text-center md:text-left">
               © {currentYear} Overberg Airport Transfers. All rights reserved.
             </p>
+            <p className="text-gray-500 text-[10px] uppercase tracking-widest font-bold">
+              Made with ❤️ in South Africa by <a href="https://evermoredigital.co.za" target="_blank" rel="noopener noreferrer" className="text-teal-500 hover:text-teal-400 transition-colors">Evermore Digital Solutions</a>
+            </p>
             <div className="flex space-x-4 md:space-x-6">
               <a href="#" className="text-gray-400 hover:text-white text-xs md:text-sm transition-colors">Privacy Policy</a>
               <a href="#" className="text-gray-400 hover:text-white text-xs md:text-sm transition-colors">Terms of Service</a>
