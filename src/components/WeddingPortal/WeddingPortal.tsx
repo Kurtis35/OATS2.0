@@ -366,6 +366,41 @@ const WeddingPortal = () => {
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Guest Bookings</h3>
             </div>
             <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead className="bg-slate-50 text-[10px] uppercase font-black tracking-widest text-slate-400 border-b border-slate-100">
+                  <tr>
+                    <th className="p-6">Guest</th>
+                    <th className="p-6">Contact</th>
+                    <th className="p-6">Accommodation</th>
+                    <th className="p-6 text-center">Count</th>
+                    <th className="p-6">Shuttle</th>
+                    <th className="p-6">Services</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {bookings.filter(b => b.fullName.toLowerCase().includes(searchTerm.toLowerCase())).map((b, i) => (
+                    <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="p-6">
+                        <div className="font-bold text-slate-800">{b.fullName} {b.surname}</div>
+                        <div className="text-[10px] text-slate-400 mt-1">{b.passengers.map(p => `${p.firstName} ${p.lastName}`).join(', ')}</div>
+                      </td>
+                      <td className="p-6">
+                        <div className="text-sm text-slate-600">{b.email}</div>
+                        <div className="text-xs text-slate-400">{b.phone}</div>
+                      </td>
+                      <td className="p-6 text-sm font-medium text-slate-700">{b.accommodation === 'Other' ? b.customAccommodation : b.accommodation}</td>
+                      <td className="p-6 text-center"><span className="bg-teal-50 text-teal-700 px-3 py-1 rounded-lg text-xs font-bold">{b.guestCount}</span></td>
+                      <td className="p-6"><span className="text-xs font-bold uppercase tracking-widest text-slate-500">{b.shuttleChoice}</span></td>
+                      <td className="p-6">
+                        <div className="flex flex-wrap gap-1">
+                          {b.additionalServices.map((s, si) => <span key={si} className="text-[8px] font-bold uppercase bg-slate-100 px-2 py-0.5 rounded text-slate-500">{s}</span>)}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </main>
       </div>
