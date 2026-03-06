@@ -288,7 +288,15 @@ const WeddingPortal = () => {
               </form>
               <div className="mt-6 flex items-center justify-between text-[10px] text-white/40 font-bold uppercase tracking-widest">
                 <span>Business Portal</span>
-                <button onClick={() => setAdminPassword('')} className="hover:text-white transition-colors">Staff Login</button>
+                <button 
+                  onClick={() => {
+                    const pw = prompt("Admin Password:");
+                    if (pw === 'ADMINGETT2026') setIsAdminLoggedIn(true);
+                  }} 
+                  className="hover:text-white transition-colors"
+                >
+                  Staff Login
+                </button>
               </div>
             </div>
           </div>
@@ -752,8 +760,18 @@ const WeddingPortal = () => {
             Elevate your stay in Elgin Valley. From luxury airport transfers to exclusive private wine tours, our premium fleet is at your service.
           </p>
           <div className="flex flex-wrap justify-center gap-6">
-            <button className="bg-white text-slate-900 px-10 py-5 rounded-[2rem] font-bold text-lg hover:bg-teal-500 hover:text-white transition-all transform hover:scale-105 active:scale-95 shadow-2xl">Book Private Transfer</button>
-            <button className="bg-transparent border-2 border-white/30 backdrop-blur-md text-white px-10 py-5 rounded-[2rem] font-bold text-lg hover:bg-white/10 transition-all">Explore Wine Tours</button>
+            <button 
+              onClick={() => navigate('/#booking')}
+              className="bg-white text-slate-900 px-10 py-5 rounded-[2rem] font-bold text-lg hover:bg-teal-500 hover:text-white transition-all transform hover:scale-105 active:scale-95 shadow-2xl"
+            >
+              Book Private Transfer
+            </button>
+            <button 
+              onClick={() => navigate('/#services')}
+              className="bg-transparent border-2 border-white/30 backdrop-blur-md text-white px-10 py-5 rounded-[2rem] font-bold text-lg hover:bg-white/10 transition-all"
+            >
+              Explore Wine Tours
+            </button>
           </div>
           
           <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 opacity-60">
