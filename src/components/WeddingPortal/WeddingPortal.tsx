@@ -330,18 +330,29 @@ Timestamp: ${data.timestamp}
                   Access Portal
                 </button>
               </form>
-              <div className="mt-6 flex items-center justify-between text-[10px] text-white/40 font-bold uppercase tracking-widest">
+            <div className="mt-6 flex flex-col items-center gap-4 text-[10px] text-white/40 font-bold uppercase tracking-widest">
+              <div className="flex items-center justify-between w-full">
                 <span>Business Portal</span>
                 <button 
                   onClick={() => {
                     const pw = prompt("Admin Password:");
                     if (pw === 'ADMINGETT2026') setIsAdminLoggedIn(true);
                   }} 
-                  className="hover:text-white transition-colors"
+                  className="hover:text-white transition-colors bg-white/5 px-3 py-1 rounded-full border border-white/10"
                 >
                   Staff Login
                 </button>
               </div>
+              <button 
+                onClick={() => {
+                  const pw = prompt("Admin Password:");
+                  if (pw === 'ADMINGETT2026') setIsAdminLoggedIn(true);
+                }}
+                className="md:hidden w-full py-3 bg-teal-500/20 hover:bg-teal-500/40 text-teal-200 rounded-xl border border-teal-500/30 transition-all"
+              >
+                Access Admin Panel
+              </button>
+            </div>
             </div>
           </div>
         </section>
@@ -360,21 +371,23 @@ Timestamp: ${data.timestamp}
   if (isAdminLoggedIn) {
     return (
       <div className="min-h-screen bg-slate-50 font-sans pb-20">
-        <header className="bg-slate-900 text-white p-4 md:p-6 sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <h1 className="text-xl font-bold flex items-center">
-              <Shield className="mr-2 text-teal-400" /> Admin Panel
-            </h1>
-            <div className="flex flex-wrap items-center gap-2 md:gap-4">
+        <header className="bg-slate-900 text-white p-4 sticky top-0 z-[100] shadow-2xl">
+          <div className="max-w-7xl mx-auto flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h1 className="text-lg font-bold flex items-center">
+                <Shield className="mr-2 text-teal-400" size={18} /> Admin Panel
+              </h1>
+              <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-white"><LogOut size={20} /></button>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
               <button 
                 onClick={() => navigate('/')} 
-                className="bg-slate-800 px-3 py-2 rounded-lg text-xs md:text-sm font-bold flex items-center hover:bg-slate-700 transition-colors"
+                className="bg-slate-800 px-2 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center hover:bg-slate-700"
               >
-                <Home size={14} className="mr-1 md:mr-2"/> Home
+                <Home size={12} className="mr-1"/> Home
               </button>
-              <button onClick={downloadCSV} className="bg-teal-600 px-3 py-2 rounded-lg text-xs md:text-sm font-bold flex items-center hover:bg-teal-500 transition-colors"><Download size={14} className="mr-1 md:mr-2"/> Export</button>
-              <button onClick={clearData} className="bg-red-600 px-3 py-2 rounded-lg text-xs md:text-sm font-bold flex items-center hover:bg-red-500 transition-colors"><Trash2 size={14} className="mr-1 md:mr-2"/> Clear</button>
-              <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-white ml-auto md:ml-0"><LogOut size={20} /></button>
+              <button onClick={downloadCSV} className="bg-teal-600 px-2 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center hover:bg-teal-500"><Download size={12} className="mr-1"/> Export</button>
+              <button onClick={clearData} className="bg-red-600 px-2 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center hover:bg-red-500"><Trash2 size={12} className="mr-1"/> Clear</button>
             </div>
           </div>
         </header>
