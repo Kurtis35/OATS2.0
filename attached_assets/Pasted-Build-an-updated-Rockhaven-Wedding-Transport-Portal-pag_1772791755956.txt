@@ -1,0 +1,289 @@
+Build an updated Rockhaven Wedding Transport Portal page for Overberg Transfers / GETT.
+
+IMPORTANT REQUIREMENTS:
+
+• Frontend only
+• No backend server
+• No database
+• Fast loading
+• Fully responsive (mobile-first)
+• Clean, well-commented code
+• Use HTML, CSS, and vanilla JavaScript only
+• Guest data must still appear in Admin Portal
+• Booking data must be prepared for Email + Spreadsheet export
+
+Email recipients:
+
+Adam@overbergtransfers.com
+
+info@overbergtransfers.com
+
+PAGE STRUCTURE (VERY IMPORTANT)
+
+Reorder the sections exactly like this:
+
+1️⃣ Guest Transport Booking Form (first thing guests see)
+2️⃣ Lodge Pickup Finder
+3️⃣ Shuttle Schedule (Afternoon + Evening)
+4️⃣ Travel Tips & Support
+5️⃣ FAQ Section
+6️⃣ Travel in Style Banner / Experience Elgin
+
+The portal should feel like a simple RSVP experience for guests.
+
+PREMIUM UI DESIGN REQUIREMENTS (VERY IMPORTANT)
+
+Make the UI look luxury, modern and wedding-grade.
+
+Design inspiration:
+
+Luxury concierge websites
+High-end travel portals
+Modern SaaS dashboards
+Premium wedding websites
+
+Use:
+
+• Large hero images
+• Glassmorphism cards
+• Smooth hover animations
+• Rounded cards (border-radius 20px+)
+• Soft shadows
+• Elegant typography
+• Generous spacing
+• Beautiful mobile layout
+• Smooth scrolling animations
+
+Use these UI effects:
+
+• Card hover lift effect
+• Fade-in scroll animations
+• Button ripple or glow hover
+• Elegant dropdown styling
+• Smooth accordion animations
+• Clean input focus states
+
+Typography:
+
+Headings → modern elegant font
+Body → clean readable sans-serif
+
+Color palette:
+
+White background
+Soft greens
+Elegant neutral greys
+Gold accent highlights for premium feel
+
+ADD HIGH QUALITY IMAGES
+
+Add beautiful photography to sections:
+
+Elgin Valley vineyards
+Luxury transport vans
+Wedding couples
+Guests enjoying wine farms
+Scenic mountain roads
+
+Use responsive images with lazy loading.
+
+SECTION 1 — GUEST TRANSPORT BOOKING FORM
+
+This is the main feature of the page.
+
+Create a modern multi-step booking form.
+
+Step 1 — Guest Details
+
+Fields:
+
+Full Name
+Surname
+Email Address
+Phone Number
+
+Step 2 — Group Information
+
+Add:
+
+Total Passengers in Your Group
+
+Based on this number dynamically generate fields:
+
+Passenger 1 Name + Surname
+Passenger 2 Name + Surname
+Passenger 3 Name + Surname
+
+This must update dynamically.
+
+Step 3 — Accommodation
+
+Dropdown list with wedding accommodations.
+
+Add option:
+
+Other Accommodation
+
+If selected show input field:
+
+Enter Accommodation Name
+
+Step 4 — Shuttle Selection
+
+Guest chooses:
+
+Preferred Pickup Shuttle
+
+Options:
+
+Afternoon Shuttle
+Evening Shuttle
+
+Step 5 — Additional Services
+
+Create section:
+
+Additional Services
+
+Checkbox options:
+
+Airport Transfer
+Elgin Wine Tour
+Pre-Wedding Sightseeing
+Recovery Day Wine Tour
+
+FORM SUBMISSION BEHAVIOR
+
+When form is submitted:
+
+1 Prevent page reload
+2 Save booking data to localStorage
+3 Show success confirmation message
+4 Display data inside Admin Dashboard
+5 Prepare data to send via email and spreadsheet export
+
+SECTION 2 — LODGE PICKUP FINDER
+
+Create an interactive lodge search tool.
+
+Guest selects their lodge.
+
+Display:
+
+Afternoon Pickup Time
+Evening Pickup Time
+
+Use a JavaScript data array storing all accommodations and times.
+
+Show result inside a highlighted card with animation.
+
+SECTION 3 — SHUTTLE SCHEDULE
+
+Create visual schedule showing:
+
+Afternoon Shuttle Departures
+Evening Shuttle Departures
+
+Display with:
+
+Modern responsive table
+or card grid layout.
+
+Must include all accommodations.
+
+SECTION 4 — TRAVEL TIPS & SUPPORT
+
+Create helpful info cards covering:
+
+Elgin weather (cold + mist)
+Rural road safety
+When guests should be ready for pickups
+Emergency contact details
+
+Use icons and modern cards.
+
+SECTION 5 — FAQ
+
+Create modern accordion.
+
+Questions:
+
+What should I wear in Elgin weather?
+When should I be ready for my shuttle?
+Who do I contact if I need help?
+Are the roads safe at night?
+What happens if I miss my shuttle?
+
+Add smooth accordion animations.
+
+SECTION 6 — TRAVEL IN STYLE
+
+Create a premium banner promoting:
+
+Airport Transfers
+Wine Tours
+Private Chauffeur Services
+
+Use a large scenic background image.
+
+Add CTA buttons.
+
+ADMIN DASHBOARD
+
+Create hidden admin panel accessible via secret admin code.
+
+Dashboard must show table containing:
+
+Guest Name
+Phone Number
+Email
+Accommodation
+Passenger Count
+Passenger Names
+Shuttle Choice
+Additional Services
+
+Include buttons:
+
+Export to CSV
+Clear All Data
+
+EMAIL + SPREADSHEET EXPORT
+
+Prepare booking data to send using frontend integrations.
+
+Emails must go to:
+
+Adam@overbergtransfers.com
+
+info@overbergtransfers.com
+
+Data must also be exportable as CSV for spreadsheet tracking.
+
+PERFORMANCE REQUIREMENTS
+
+Site must:
+
+Load quickly
+Be lightweight
+Be mobile optimized
+Be easy for international guests to use
+Be extremely simple to duplicate for future weddings
+
+FINAL GOAL
+
+The finished portal must feel like a premium wedding concierge platform where guests can:
+
+Quickly RSVP transport
+Select pickup times
+Request additional services
+View lodge pickup times
+Get travel information
+
+Admins must be able to:
+
+See all guest bookings
+Track accommodations
+Export booking data easily
+
+All while keeping the system 100% frontend-only.
