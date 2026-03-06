@@ -129,10 +129,28 @@ const WeddingPortal = () => {
 
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  // Data State
+  const [bookings, setBookings] = useState<Booking[]>(() => {
+    const saved = localStorage.getItem('wedding_local_bookings_v3_persistent');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Error parsing bookings", e);
+      }
+    }
+    return [];
+  });
+
   const [details, setDetails] = useState<WeddingDetails>(() => {
     const saved = localStorage.getItem('wedding_details_v3_persistent');
-    return saved ? JSON.parse(saved) : {
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Error parsing details", e);
+      }
+    }
+    return {
       contactWhatsApp: '079 503 6849',
       contactEmail: 'Adam@overbergtransfers.com',
       shuttleStatus: 'All shuttles are currently on time. Please be ready 10 minutes before your pickup.',
@@ -140,12 +158,20 @@ const WeddingPortal = () => {
     };
   });
 
-  const [bookings, setBookings] = useState<Booking[]>(() => {
-    const saved = localStorage.getItem('wedding_local_bookings_v3_persistent');
-    return saved ? JSON.parse(saved) : [];
-  });
+  // Persistence logic - use a single source of truth and broadcast changes
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'wedding_local_bookings_v3_persistent' && e.newValue) {
+        setBookings(JSON.parse(e.newValue));
+      }
+      if (e.key === 'wedding_details_v3_persistent' && e.newValue) {
+        setDetails(JSON.parse(e.newValue));
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
-  // Persistence
   useEffect(() => {
     localStorage.setItem('wedding_local_bookings_v3_persistent', JSON.stringify(bookings));
   }, [bookings]);
@@ -216,6 +242,24 @@ const WeddingPortal = () => {
 
     setBookings(prev => [...prev, data]);
     setFormSubmitted(true);
+
+    // Send Email via mailto (fallback for client-side only)
+    const subject = encodeURIComponent(`New Wedding Transport RSVP: ${data.fullName} ${data.surname}`);
+    const body = encodeURIComponent(`
+New Wedding Transport RSVP Received:
+----------------------------------
+Name: ${data.fullName} ${data.surname}
+Email: ${data.email}
+Phone: ${data.phone}
+Guest Count: ${data.guestCount}
+Passengers: ${data.passengers.map(p => `${p.firstName} ${p.lastName}`).join(', ')}
+Accommodation: ${data.accommodation === 'Other' ? data.customAccommodation : data.accommodation}
+Shuttle: ${data.shuttleChoice}
+Services: ${data.additionalServices.join(', ')}
+Timestamp: ${data.timestamp}
+    `);
+    
+    window.location.href = `mailto:${details.contactEmail}?subject=${subject}&body=${body}`;
   };
 
   const downloadCSV = () => {
@@ -315,61 +359,63 @@ const WeddingPortal = () => {
 
   if (isAdminLoggedIn) {
     return (
-      <div className="min-h-screen bg-slate-50 font-sans">
-        <header className="bg-slate-900 text-white p-6 sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <div className="min-h-screen bg-slate-50 font-sans pb-20">
+        <header className="bg-slate-900 text-white p-4 md:p-6 sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
             <h1 className="text-xl font-bold flex items-center">
-              <Shield className="mr-2 text-teal-400" /> Admin Dashboard
+              <Shield className="mr-2 text-teal-400" /> Admin Panel
             </h1>
-            <div className="flex space-x-4">
+            <div className="flex flex-wrap items-center gap-2 md:gap-4">
               <button 
                 onClick={() => navigate('/')} 
-                className="bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold flex items-center hover:bg-slate-700 transition-colors"
+                className="bg-slate-800 px-3 py-2 rounded-lg text-xs md:text-sm font-bold flex items-center hover:bg-slate-700 transition-colors"
               >
-                <Home size={16} className="mr-2"/> Home
+                <Home size={14} className="mr-1 md:mr-2"/> Home
               </button>
-              <button onClick={downloadCSV} className="bg-teal-600 px-4 py-2 rounded-lg text-sm font-bold flex items-center"><Download size={16} className="mr-2"/> Export CSV</button>
-              <button onClick={clearData} className="bg-red-600 px-4 py-2 rounded-lg text-sm font-bold flex items-center"><Trash2 size={16} className="mr-2"/> Clear All</button>
-              <button onClick={handleLogout} className="text-slate-400 hover:text-white"><LogOut /></button>
+              <button onClick={downloadCSV} className="bg-teal-600 px-3 py-2 rounded-lg text-xs md:text-sm font-bold flex items-center hover:bg-teal-500 transition-colors"><Download size={14} className="mr-1 md:mr-2"/> Export</button>
+              <button onClick={clearData} className="bg-red-600 px-3 py-2 rounded-lg text-xs md:text-sm font-bold flex items-center hover:bg-red-500 transition-colors"><Trash2 size={14} className="mr-1 md:mr-2"/> Clear</button>
+              <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-white ml-auto md:ml-0"><LogOut size={20} /></button>
             </div>
           </div>
         </header>
-        <main className="max-w-7xl mx-auto p-8">
-          <div className="bg-white rounded-[2rem] shadow-xl overflow-hidden border border-slate-100">
-            <div className="p-6 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
-              <div className="relative w-96">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input placeholder="Search guests..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full pl-12 pr-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20" />
-              </div>
-              <div className="text-sm font-bold text-slate-400 uppercase tracking-widest">{bookings.length} Total Bookings</div>
+
+        <main className="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
+          {/* Lodge Times Section */}
+          <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
+            <div className="p-6 bg-slate-50/50 border-b border-slate-100">
+              <h2 className="text-sm font-black uppercase tracking-widest text-slate-500 flex items-center">
+                <Clock className="mr-2 text-teal-500" size={16} /> Lodge Pickup Times
+              </h2>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-left">
+              <table className="w-full text-left min-w-[600px]">
                 <thead className="bg-slate-50 text-[10px] uppercase font-black tracking-widest text-slate-400 border-b border-slate-100">
                   <tr>
-                    <th className="p-6">Lodge</th>
-                    <th className="p-6">Afternoon Pickup</th>
-                    <th className="p-6">Evening Pickup</th>
+                    <th className="p-4 md:p-6">Lodge</th>
+                    <th className="p-4 md:p-6">Afternoon Pickup</th>
+                    <th className="p-4 md:p-6">Evening Pickup</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
                   {LODGES.map(l => (
-                    <tr key={l}>
-                      <td className="p-6 font-bold text-slate-800">{l}</td>
-                      <td className="p-6">
+                    <tr key={l} className="hover:bg-slate-50/30 transition-colors">
+                      <td className="p-4 md:p-6 font-bold text-slate-800 text-sm">{l}</td>
+                      <td className="p-4 md:p-6">
                         <input 
                           type="text" 
                           value={details.lodgeTimes[l]?.afternoon || ''} 
                           onChange={e => handleTimeChange(l, 'afternoon', e.target.value)}
-                          className="bg-white border border-slate-200 rounded px-3 py-1 text-sm focus:border-teal-500 outline-none w-32"
+                          className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500/10 outline-none w-full max-w-[140px]"
+                          placeholder="e.g. 2:00 PM"
                         />
                       </td>
-                      <td className="p-6">
+                      <td className="p-4 md:p-6">
                         <input 
                           type="text" 
                           value={details.lodgeTimes[l]?.evening || ''} 
                           onChange={e => handleTimeChange(l, 'evening', e.target.value)}
-                          className="bg-white border border-slate-200 rounded px-3 py-1 text-sm focus:border-teal-500 outline-none w-32"
+                          className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500/10 outline-none w-full max-w-[140px]"
+                          placeholder="e.g. 6:00 PM"
                         />
                       </td>
                     </tr>
@@ -377,43 +423,85 @@ const WeddingPortal = () => {
                 </tbody>
               </table>
             </div>
+          </div>
 
-            <div className="p-6 bg-slate-50 border-t border-slate-100">
-              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Guest Bookings</h3>
+          {/* Guest Bookings Section */}
+          <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
+            <div className="p-4 md:p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div className="relative w-full md:w-96">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <input 
+                  placeholder="Search guests or lodges..." 
+                  value={searchTerm} 
+                  onChange={e => setSearchTerm(e.target.value)} 
+                  className="w-full pl-12 pr-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 bg-white" 
+                />
+              </div>
+              <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-white px-4 py-2 rounded-full border border-slate-100">
+                {bookings.length} Total Bookings
+              </div>
             </div>
+
             <div className="overflow-x-auto">
-              <table className="w-full text-left">
+              <table className="w-full text-left min-w-[800px]">
                 <thead className="bg-slate-50 text-[10px] uppercase font-black tracking-widest text-slate-400 border-b border-slate-100">
                   <tr>
-                    <th className="p-6">Guest</th>
-                    <th className="p-6">Contact</th>
-                    <th className="p-6">Accommodation</th>
-                    <th className="p-6 text-center">Count</th>
-                    <th className="p-6">Shuttle</th>
-                    <th className="p-6">Services</th>
+                    <th className="p-4 md:p-6">Guest Details</th>
+                    <th className="p-4 md:p-6">Contact Info</th>
+                    <th className="p-4 md:p-6">Accommodation</th>
+                    <th className="p-4 md:p-6 text-center">Qty</th>
+                    <th className="p-4 md:p-6">Shuttle</th>
+                    <th className="p-4 md:p-6">Add-ons</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                  {bookings.filter(b => b.fullName.toLowerCase().includes(searchTerm.toLowerCase())).map((b, i) => (
+                  {bookings.filter(b => 
+                    b.fullName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                    b.surname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    b.accommodation.toLowerCase().includes(searchTerm.toLowerCase())
+                  ).map((b, i) => (
                     <tr key={i} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="p-6">
+                      <td className="p-4 md:p-6">
                         <div className="font-bold text-slate-800">{b.fullName} {b.surname}</div>
-                        <div className="text-[10px] text-slate-400 mt-1">{b.passengers.map(p => `${p.firstName} ${p.lastName}`).join(', ')}</div>
+                        <div className="text-[10px] text-slate-400 mt-1 font-medium">{b.passengers.map(p => `${p.firstName} ${p.lastName}`).join(', ')}</div>
                       </td>
-                      <td className="p-6">
-                        <div className="text-sm text-slate-600">{b.email}</div>
-                        <div className="text-xs text-slate-400">{b.phone}</div>
+                      <td className="p-4 md:p-6">
+                        <div className="text-sm text-slate-600 flex items-center gap-1"><Mail size={12} /> {b.email}</div>
+                        <div className="text-xs text-slate-400 flex items-center gap-1 mt-1"><Phone size={12} /> {b.phone}</div>
                       </td>
-                      <td className="p-6 text-sm font-medium text-slate-700">{b.accommodation === 'Other' ? b.customAccommodation : b.accommodation}</td>
-                      <td className="p-6 text-center"><span className="bg-teal-50 text-teal-700 px-3 py-1 rounded-lg text-xs font-bold">{b.guestCount}</span></td>
-                      <td className="p-6"><span className="text-xs font-bold uppercase tracking-widest text-slate-500">{b.shuttleChoice}</span></td>
-                      <td className="p-6">
+                      <td className="p-4 md:p-6">
+                        <span className="text-sm font-semibold text-slate-700">
+                          {b.accommodation === 'Other' ? b.customAccommodation : b.accommodation}
+                        </span>
+                      </td>
+                      <td className="p-4 md:p-6 text-center">
+                        <span className="bg-teal-50 text-teal-700 px-3 py-1 rounded-full text-xs font-black border border-teal-100">
+                          {b.guestCount}
+                        </span>
+                      </td>
+                      <td className="p-4 md:p-6">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                          {b.shuttleChoice}
+                        </span>
+                      </td>
+                      <td className="p-4 md:p-6">
                         <div className="flex flex-wrap gap-1">
-                          {b.additionalServices.map((s, si) => <span key={si} className="text-[8px] font-bold uppercase bg-slate-100 px-2 py-0.5 rounded text-slate-500">{s}</span>)}
+                          {b.additionalServices.map((s, si) => (
+                            <span key={si} className="text-[8px] font-black uppercase bg-teal-500/10 px-2 py-0.5 rounded text-teal-700 border border-teal-500/10">
+                              {s}
+                            </span>
+                          ))}
                         </div>
                       </td>
                     </tr>
                   ))}
+                  {bookings.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="p-12 text-center text-slate-400 font-medium italic">
+                        No bookings found.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
