@@ -123,10 +123,12 @@ const WeddingPortal = () => {
   // RSVP Form State
   const [rsvpStep, setRsvpStep] = useState(1);
   const [formSubmitted, setFormSubmitted] = useState(false);
-  const [guestCount, setGuestCount] = useState(1);
-  const [passengers, setPassengers] = useState<Passenger[]>([{ firstName: '', lastName: '' }]);
-  const [selectedLodgeRSVP, setSelectedLodgeRSVP] = useState('');
+  const [totalPax, setTotalPax] = useState(1);
+  const [selectedAccommodation, setSelectedAccommodation] = useState('');
+  const [customAccommodation, setCustomAccommodation] = useState('');
+  const [shuttleOption, setShuttleOption] = useState('');
   const [additionalServices, setAdditionalServices] = useState<string[]>([]);
+  const [airportTransferType, setAirportTransferType] = useState<'One Way Transfer' | 'Return Transfer' | ''>('');
 
   // UI State
   const [selectedFinderLodge, setSelectedFinderLodge] = useState('');
@@ -268,17 +270,22 @@ const WeddingPortal = () => {
   const handleRSVPSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+    const fullName = formData.get('fullName') as string;
+    const surname = formData.get('surname') as string;
+    const email = formData.get('email') as string;
+    const phone = formData.get('phone') as string;
+    
     const data: Booking = {
       timestamp: new Date().toLocaleString(),
-      fullName: formData.get('fullName') as string,
-      surname: formData.get('surname') as string,
-      email: formData.get('email') as string,
-      phone: formData.get('phone') as string,
-      guestCount,
-      passengers,
-      accommodation: selectedLodgeRSVP,
-      customAccommodation: formData.get('customAccommodation') as string,
-      shuttleChoice: formData.get('shuttleChoice') as 'Afternoon' | 'Evening',
+      fullName,
+      surname,
+      email,
+      phone,
+      guestCount: totalPax,
+      passengers: [],
+      accommodation: selectedAccommodation,
+      customAccommodation: selectedAccommodation === 'Other Accommodation' ? customAccommodation : '',
+      shuttleChoice: shuttleOption as 'Afternoon' | 'Evening',
       additionalServices
     };
 
@@ -301,18 +308,17 @@ const WeddingPortal = () => {
     });
 
     // Also send via email as fallback
-    const subject = encodeURIComponent(`New Wedding Transport RSVP: ${data.fullName} ${data.surname}`);
+    const subject = encodeURIComponent(`New Wedding Transport RSVP: ${fullName} ${surname}`);
     const body = encodeURIComponent(`
 New Wedding Transport RSVP Received:
 ----------------------------------
-Name: ${data.fullName} ${data.surname}
-Email: ${data.email}
-Phone: ${data.phone}
-Guest Count: ${data.guestCount}
-Passengers: ${data.passengers.map(p => `${p.firstName} ${p.lastName}`).join(', ')}
-Accommodation: ${data.accommodation === 'Other' ? data.customAccommodation : data.accommodation}
-Shuttle: ${data.shuttleChoice}
-Services: ${data.additionalServices.join(', ')}
+Name: ${fullName} ${surname}
+Email: ${email}
+Phone: ${phone}
+Total Passengers: ${totalPax}
+Accommodation: ${selectedAccommodation === 'Other Accommodation' ? customAccommodation : selectedAccommodation}
+Shuttle: ${shuttleOption}
+Services: ${additionalServices.join(', ')}
 Timestamp: ${data.timestamp}
     `);
     
@@ -323,10 +329,12 @@ Timestamp: ${data.timestamp}
     setTimeout(() => {
       setFormSubmitted(false);
       setRsvpStep(1);
-      setSelectedLodgeRSVP('');
+      setSelectedAccommodation('');
+      setCustomAccommodation('');
+      setShuttleOption('');
       setAdditionalServices([]);
-      setPassengers([{ firstName: '', lastName: '' }]);
-      setGuestCount(1);
+      setTotalPax(1);
+      setAirportTransferType('');
     }, 3000);
   };
 
@@ -380,9 +388,10 @@ Timestamp: ${data.timestamp}
           <div className="absolute inset-0 bg-black/50 z-10" />
           <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80" alt="Wedding" className="absolute inset-0 w-full h-full object-cover animate-subtle-zoom" />
           <div className="relative z-20 container mx-auto px-4 text-center">
-            <div className="inline-block mb-6 px-4 py-1 border border-white/30 rounded-full backdrop-blur-md text-xs font-bold uppercase tracking-widest">Premium Transport Portal</div>
-            <h1 className="text-5xl md:text-7xl font-serif italic mb-6">Rockhaven Wedding</h1>
-            <p className="text-xl md:text-2xl font-light mb-12 tracking-wide text-slate-200">Elgin Valley | Saturday 4 April 2026</p>
+            <img src="/OATS LOGO.jpg" alt="GETT Logo" className="h-20 mx-auto mb-6 rounded-xl shadow-2xl" />
+            <h1 className="text-5xl md:text-7xl font-serif italic mb-4">Rockhaven Wedding</h1>
+            <p className="text-xl font-light mb-8 tracking-wide text-slate-200">Welcome to the Rockhaven Wedding Guest Transport Portal</p>
+            <p className="text-lg font-light mb-12 text-slate-300">Please continue to submit your transport booking and view shuttle schedules.</p>
             
             <div className="max-w-md mx-auto bg-white/10 backdrop-blur-xl p-8 rounded-[2rem] border border-white/20 shadow-2xl">
               <form onSubmit={handleGuestLogin} className="space-y-4">
@@ -605,7 +614,7 @@ Timestamp: ${data.timestamp}
 
           <div className="bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden">
             <div className="flex border-b border-slate-50">
-              {[1, 2, 3, 4, 5].map(step => (
+              {[1, 2, 3, 4].map(step => (
                 <div key={step} className={`flex-1 py-4 text-center text-[10px] font-black uppercase tracking-[0.2em] transition-colors ${rsvpStep === step ? 'text-teal-600 bg-teal-50' : 'text-slate-300'}`}>Step {step}</div>
               ))}
             </div>
@@ -649,32 +658,26 @@ Timestamp: ${data.timestamp}
                   {rsvpStep === 2 && (
                     <div className="space-y-6 animate-fade-in">
                       <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-widest text-slate-400">Total Passengers</label>
-                        <select value={guestCount} onChange={e => updateGuestCount(parseInt(e.target.value))} className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-teal-500 outline-none">
-                          {[1,2,3,4,5,6,7,8].map(n => <option key={n} value={n}>{n} {n === 1 ? 'Passenger' : 'Passengers'}</option>)}
+                        <label className="text-xs font-black uppercase tracking-widest text-slate-400">Select Your Accommodation</label>
+                        <select required value={selectedAccommodation} onChange={e => setSelectedAccommodation(e.target.value)} className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-teal-500 outline-none">
+                          <option value="">Choose accommodation...</option>
+                          <option value="Rockhaven Lodge">Rockhaven Lodge</option>
+                          <option value="Elgin Valley Inn">Elgin Valley Inn</option>
+                          <option value="Orchard Guest House">Orchard Guest House</option>
+                          <option value="Other Accommodation">Other Accommodation</option>
                         </select>
                       </div>
-                      <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
-                        {passengers.map((p, i) => (
-                          <div key={i} className="grid grid-cols-2 gap-4 p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                            <div className="space-y-2">
-                              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">P{i+1} First Name</label>
-                              <input required value={p.firstName} onChange={e => {
-                                const newP = [...passengers];
-                                newP[i].firstName = e.target.value;
-                                setPassengers(newP);
-                              }} className="w-full px-4 py-3 rounded-xl bg-white border border-slate-100 outline-none focus:border-teal-500" />
-                            </div>
-                            <div className="space-y-2">
-                              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">P{i+1} Surname</label>
-                              <input required value={p.lastName} onChange={e => {
-                                const newP = [...passengers];
-                                newP[i].lastName = e.target.value;
-                                setPassengers(newP);
-                              }} className="w-full px-4 py-3 rounded-xl bg-white border border-slate-100 outline-none focus:border-teal-500" />
-                            </div>
-                          </div>
-                        ))}
+                      {selectedAccommodation === 'Other Accommodation' && (
+                        <div className="space-y-2 animate-slide-down">
+                          <label className="text-xs font-black uppercase tracking-widest text-slate-400">Enter Accommodation Name</label>
+                          <input required value={customAccommodation} onChange={e => setCustomAccommodation(e.target.value)} className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-teal-500 outline-none" />
+                        </div>
+                      )}
+                      <div className="space-y-2">
+                        <label className="text-xs font-black uppercase tracking-widest text-slate-400">Total Pax You Book For</label>
+                        <select required value={totalPax} onChange={e => setTotalPax(parseInt(e.target.value))} className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-teal-500 outline-none">
+                          {[1,2,3,4,5,6,7,8].map(n => <option key={n} value={n}>{n} {n === 1 ? 'Person' : 'People'}</option>)}
+                        </select>
                       </div>
                       <div className="flex gap-4">
                         <button type="button" onClick={() => setRsvpStep(1)} className="flex-1 bg-slate-100 py-5 rounded-2xl font-bold text-slate-500">Back</button>
@@ -687,20 +690,20 @@ Timestamp: ${data.timestamp}
 
                   {rsvpStep === 3 && (
                     <div className="space-y-6 animate-fade-in">
-                      <div className="space-y-2">
-                        <label className="text-xs font-black uppercase tracking-widest text-slate-400">Select Accommodation</label>
-                        <select required value={selectedLodgeRSVP} onChange={e => setSelectedLodgeRSVP(e.target.value)} className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-teal-500 outline-none">
-                          <option value="">Select accommodation...</option>
-                          {ACCOMMODATIONS.map(l => <option key={l} value={l}>{l}</option>)}
-                          <option value="Other">Other Accommodation</option>
-                        </select>
-                      </div>
-                      {selectedLodgeRSVP === 'Other' && (
-                        <div className="space-y-2 animate-slide-down">
-                          <label className="text-xs font-black uppercase tracking-widest text-slate-400">Enter Accommodation Name</label>
-                          <input required name="customAccommodation" className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-teal-500 outline-none" />
+                      <div className="space-y-2 text-center mb-8">
+                        <label className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4 block">Evening Shuttle Options</label>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {['Option 1', 'Option 2', 'Option 3'].map(option => (
+                            <label key={option} className="relative cursor-pointer">
+                              <input required type="radio" name="shuttleOption" value={option} onChange={e => setShuttleOption(e.target.value)} className="peer sr-only" />
+                              <div className="p-6 rounded-2xl border-2 border-slate-100 bg-slate-50 text-slate-600 font-bold peer-checked:border-teal-500 peer-checked:text-teal-600 peer-checked:bg-teal-50 transition-all hover:border-teal-300">
+                                <Clock className="mx-auto mb-2" size={24} />
+                                {option}
+                              </div>
+                            </label>
+                          ))}
                         </div>
-                      )}
+                      </div>
                       <div className="flex gap-4">
                         <button type="button" onClick={() => setRsvpStep(2)} className="flex-1 bg-slate-100 py-5 rounded-2xl font-bold text-slate-500">Back</button>
                         <button type="button" onClick={() => setRsvpStep(4)} className="flex-[2] bg-slate-900 text-white py-5 rounded-2xl font-bold flex items-center justify-center group">
@@ -711,59 +714,64 @@ Timestamp: ${data.timestamp}
                   )}
 
                   {rsvpStep === 4 && (
-                    <div className="space-y-6 animate-fade-in">
-                      <div className="space-y-2 text-center mb-8">
-                        <label className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4 block">Preferred Pickup Shuttle</label>
-                        <div className="grid grid-cols-2 gap-4">
-                          {['Afternoon', 'Evening'].map(type => (
-                            <label key={type} className="relative cursor-pointer">
-                              <input required type="radio" name="shuttleChoice" value={type} className="peer sr-only" />
-                              <div className="p-8 rounded-3xl border-2 border-slate-100 bg-slate-50 text-slate-400 font-bold peer-checked:border-teal-500 peer-checked:text-teal-600 peer-checked:bg-teal-50 transition-all">
-                                {type === 'Afternoon' ? <Sun className="mx-auto mb-2" /> : <Clock className="mx-auto mb-2" />}
-                                {type} Shuttle
-                              </div>
+                    <div className="space-y-8 animate-fade-in">
+                      <div className="space-y-4">
+                        <label className="text-xs font-black uppercase tracking-widest text-slate-400 block mb-4">Additional Services</label>
+                        
+                        <div className="space-y-4">
+                          <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100">
+                            <label className="flex items-center cursor-pointer">
+                              <input 
+                                type="checkbox" 
+                                className="w-5 h-5 rounded-md border-slate-300 text-teal-600"
+                                checked={additionalServices.includes('Airport Transfer')}
+                                onChange={e => {
+                                  if (e.target.checked) setAdditionalServices([...additionalServices, 'Airport Transfer']);
+                                  else setAdditionalServices(additionalServices.filter(s => s !== 'Airport Transfer'));
+                                }}
+                              />
+                              <span className="ml-4 text-slate-800 font-bold">Airport Transfer</span>
                             </label>
-                          ))}
+                            {additionalServices.includes('Airport Transfer') && (
+                              <div className="mt-4 ml-10 space-y-2 animate-slide-down">
+                                <select value={airportTransferType} onChange={e => setAirportTransferType(e.target.value as 'One Way Transfer' | 'Return Transfer')} className="w-full px-4 py-3 rounded-xl bg-white border border-slate-100 focus:border-teal-500 outline-none text-sm">
+                                  <option value="">Select transfer type...</option>
+                                  <option value="One Way Transfer">One Way Transfer</option>
+                                  <option value="Return Transfer">Return Transfer</option>
+                                </select>
+                              </div>
+                            )}
+                          </div>
+
+                          <label className="flex items-center p-6 rounded-2xl bg-slate-50 border border-slate-100 cursor-pointer hover:bg-white hover:shadow-lg transition-all group">
+                            <input 
+                              type="checkbox" 
+                              className="w-5 h-5 rounded-md border-slate-300 text-teal-600"
+                              checked={additionalServices.includes('Wine Tour')}
+                              onChange={e => {
+                                if (e.target.checked) setAdditionalServices([...additionalServices, 'Wine Tour']);
+                                else setAdditionalServices(additionalServices.filter(s => s !== 'Wine Tour'));
+                              }}
+                            />
+                            <span className="ml-4 text-slate-800 font-bold">Wine Tour</span>
+                          </label>
+
+                          <label className="flex items-center p-6 rounded-2xl bg-slate-50 border border-slate-100 cursor-pointer hover:bg-white hover:shadow-lg transition-all group">
+                            <input 
+                              type="checkbox" 
+                              className="w-5 h-5 rounded-md border-slate-300 text-teal-600"
+                              checked={additionalServices.includes('Day Tour')}
+                              onChange={e => {
+                                if (e.target.checked) setAdditionalServices([...additionalServices, 'Day Tour']);
+                                else setAdditionalServices(additionalServices.filter(s => s !== 'Day Tour'));
+                              }}
+                            />
+                            <span className="ml-4 text-slate-800 font-bold">Day Tour</span>
+                          </label>
                         </div>
                       </div>
                       <div className="flex gap-4">
                         <button type="button" onClick={() => setRsvpStep(3)} className="flex-1 bg-slate-100 py-5 rounded-2xl font-bold text-slate-500">Back</button>
-                        <button type="button" onClick={() => setRsvpStep(5)} className="flex-[2] bg-slate-900 text-white py-5 rounded-2xl font-bold flex items-center justify-center group">
-                          Next Step <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {rsvpStep === 5 && (
-                    <div className="space-y-8 animate-fade-in">
-                      <div className="space-y-4">
-                        <label className="text-xs font-black uppercase tracking-widest text-slate-400 block mb-2">Additional Services</label>
-                        <div className="grid md:grid-cols-2 gap-4">
-                          {[
-                            { id: 'airport', label: 'Airport Transfer', icon: <Plane size={18}/> },
-                            { id: 'wedding', label: 'Exclusive Rockhaven Wedding Experiences', icon: <Wine size={18}/> }
-                          ].map(service => (
-                            <label key={service.id} className="flex items-center p-6 rounded-2xl bg-slate-50 border border-slate-100 cursor-pointer hover:bg-white hover:shadow-lg transition-all group">
-                              <input 
-                                type="checkbox" 
-                                className="w-5 h-5 rounded-md border-slate-300 text-teal-600 focus:ring-teal-500"
-                                checked={additionalServices.includes(service.label)}
-                                onChange={e => {
-                                  if (e.target.checked) setAdditionalServices([...additionalServices, service.label]);
-                                  else setAdditionalServices(additionalServices.filter(s => s !== service.label));
-                                }}
-                              />
-                              <div className="ml-4 flex items-center text-slate-600 group-hover:text-teal-600 font-bold">
-                                <span className="mr-3">{service.icon}</span>
-                                {service.label}
-                              </div>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="flex gap-4">
-                        <button type="button" onClick={() => setRsvpStep(4)} className="flex-1 bg-slate-100 py-5 rounded-2xl font-bold text-slate-500">Back</button>
                         <button type="submit" className="flex-[2] bg-teal-600 text-white py-5 rounded-2xl font-bold shadow-xl shadow-teal-600/20 hover:bg-teal-700 transition-all active:scale-95">Complete Reservation</button>
                       </div>
                     </div>
@@ -775,12 +783,21 @@ Timestamp: ${data.timestamp}
         </div>
       </section>
 
-      {/* 2. LODGE PICKUP FINDER */}
+      {/* Header with Logo */}
+      <header className="bg-white border-b border-slate-100 sticky top-0 z-50 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <img src="/OATS LOGO.jpg" alt="GETT Logo" className="h-12 rounded-lg" />
+          <h1 className="text-2xl font-serif italic text-slate-900">Rockhaven Wedding Portal</h1>
+          <button onClick={handleLogout} className="p-2 text-slate-400 hover:text-red-600"><LogOut size={20} /></button>
+        </div>
+      </header>
+
+      {/* 2. PICKUP SCHEDULE */}
       <section className="py-24 bg-white relative overflow-hidden">
         <div className="max-w-4xl mx-auto px-4 relative z-10 text-center">
-          <div className="inline-block mb-4 px-3 py-1 bg-teal-50 text-teal-600 rounded-full text-[10px] font-black uppercase tracking-widest">Interactive Tool</div>
-          <h2 className="text-4xl md:text-5xl font-serif italic text-slate-900 mb-6">Lodge Pickup Finder</h2>
-          <p className="text-slate-500 font-light mb-12 max-w-xl mx-auto">Select your accommodation below to find your specific shuttle departure times for the big day.</p>
+          <div className="inline-block mb-4 px-3 py-1 bg-teal-50 text-teal-600 rounded-full text-[10px] font-black uppercase tracking-widest">Your Schedule</div>
+          <h2 className="text-4xl md:text-5xl font-serif italic text-slate-900 mb-6">Pickup Schedule</h2>
+          <p className="text-slate-500 font-light mb-12 max-w-xl mx-auto">View your specific shuttle departure times for the big day.</p>
           
           <div className="max-w-md mx-auto relative mb-12">
             <select 
@@ -813,65 +830,50 @@ Timestamp: ${data.timestamp}
         </div>
       </section>
 
-      {/* 3. SHUTTLE SCHEDULE */}
-      <section className="py-24 bg-slate-900 text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_30%,_var(--tw-gradient-stops))] from-teal-500 to-transparent" />
-        </div>
-        <div className="max-w-6xl mx-auto px-4 relative z-10">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-serif italic mb-6">Master Schedule</h2>
-            <p className="text-slate-400 font-light max-w-xl mx-auto">A comprehensive overview of all shuttle operations across Elgin Valley.</p>
-          </div>
-
-          <div className="bg-white/5 backdrop-blur-md rounded-[3rem] border border-white/10 overflow-hidden shadow-2xl">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead className="bg-white/10 text-[10px] font-black uppercase tracking-[0.3em] text-teal-400 border-b border-white/10">
-                  <tr>
-                    <th className="p-8">Lodge Location</th>
-                    <th className="p-8">Afternoon Pickup</th>
-                    <th className="p-8 text-right">Evening Pickup</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {LODGES.map(l => (
-                    <tr key={l} className="hover:bg-white/5 transition-colors group">
-                      <td className="p-8 font-bold text-slate-200 group-hover:text-white">{l}</td>
-                      <td className="p-8"><span className="bg-teal-500/10 text-teal-400 px-4 py-1 rounded-full text-xs font-bold">{details.lodgeTimes[l]?.afternoon || 'TBC'}</span></td>
-                      <td className="p-8 text-right"><span className="bg-white/10 text-white px-4 py-1 rounded-full text-xs font-bold">{details.lodgeTimes[l]?.evening || 'TBC'}</span></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. TRAVEL TIPS & SUPPORT */}
+      {/* 3. SERVICES SECTION */}
       <section className="py-24 bg-slate-50">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="bg-white p-10 rounded-[2.5rem] shadow-xl border border-slate-100 group hover:-translate-y-2 transition-all duration-500">
-              <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-8"><Sun size={32}/></div>
-              <h4 className="text-xl font-bold mb-4">Elgin Weather</h4>
-              <p className="text-sm text-slate-500 font-light leading-relaxed">Elgin is known for its cool mist and micro-climates. Please bring a warm jacket for the evening.</p>
+          <div className="space-y-20">
+            {/* Airport Transfers */}
+            <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden p-10 md:p-16">
+              <h3 className="text-3xl md:text-4xl font-bold mb-6 text-slate-900">Airport Transfers</h3>
+              <p className="text-lg text-slate-600 leading-relaxed mb-8">Professional and reliable transport from Cape Town International Airport to your accommodation in Elgin Valley. We handle all your baggage and ensure a smooth arrival experience for all wedding guests.</p>
+              <div className="flex gap-4">
+                <button onClick={() => setRsvpStep(1)} className="bg-teal-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-teal-700 transition-all">Book Airport Transfer</button>
+              </div>
             </div>
-            <div className="bg-white p-10 rounded-[2.5rem] shadow-xl border border-slate-100 group hover:-translate-y-2 transition-all duration-500">
-              <div className="w-16 h-16 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center mb-8"><MapPin size={32}/></div>
-              <h4 className="text-xl font-bold mb-4">Rural Roads</h4>
-              <p className="text-sm text-slate-500 font-light leading-relaxed">Roads can be winding and dark. We highly recommend using our shuttles for safety and convenience.</p>
+
+            {/* Exclusive Rockhaven Wedding Experiences */}
+            <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
+              <div className="p-10 md:p-16">
+                <h3 className="text-3xl md:text-4xl font-bold mb-6 text-slate-900">Exclusive Rockhaven Wedding Experiences</h3>
+                <p className="text-lg text-slate-600 leading-relaxed mb-12">Enhance your stay with curated wine tours and day experiences across the beautiful Elgin Valley.</p>
+              </div>
+              <div className="grid md:grid-cols-2 gap-6 px-10 md:px-16 pb-10 md:pb-16">
+                {[1, 2].map(i => (
+                  <div key={i} className="aspect-[3/2] rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all group cursor-pointer">
+                    <img 
+                      src={`https://images.unsplash.com/photo-${i === 1 ? '1510812431401-41d2cab2707d' : '1608270861620-7912a5f6e5d0'}?auto=format&fit=crop&q=80`} 
+                      alt={`Tour ${i}`} 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-all duration-500 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                      <span className="text-white font-bold text-lg">Tour Experience {i}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="bg-white p-10 rounded-[2.5rem] shadow-xl border border-slate-100 group hover:-translate-y-2 transition-all duration-500">
-              <div className="w-16 h-16 bg-teal-50 text-teal-500 rounded-2xl flex items-center justify-center mb-8"><Clock size={32}/></div>
-              <h4 className="text-xl font-bold mb-4">Prompt Arrival</h4>
-              <p className="text-sm text-slate-500 font-light leading-relaxed">Shuttles operate on a strict schedule. Please be ready at your lodge 10 minutes prior to pickup.</p>
-            </div>
-            <div className="bg-white p-10 rounded-[2.5rem] shadow-xl border border-slate-100 group hover:-translate-y-2 transition-all duration-500">
-              <div className="w-16 h-16 bg-slate-900 text-white rounded-2xl flex items-center justify-center mb-8"><Phone size={32}/></div>
-              <h4 className="text-xl font-bold mb-4">Emergency Support</h4>
-              <p className="text-sm text-slate-500 font-light leading-relaxed">Running late or lost? WhatsApp Adam at {details.contactWhatsApp} for immediate logistics support.</p>
+
+            {/* Other Services */}
+            <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
+              <div className="aspect-[16/9] overflow-hidden">
+                <img 
+                  src="https://images.unsplash.com/photo-1502933691298-84fc14542831?auto=format&fit=crop&q=80" 
+                  alt="Additional Services" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -967,69 +969,22 @@ Timestamp: ${data.timestamp}
              <a href="#" className="hover:text-teal-600 transition-colors"><MapPin size={20}/></a>
           </div>
 
-          <div className="mt-16">
-            <div className="flex items-center justify-between mb-8">
-              <h3 className="text-xl font-serif italic text-slate-900">Wedding Gallery</h3>
-              <div className="flex items-center space-x-4">
-                <button 
-                  onClick={() => navigate('/')} 
-                  className="flex items-center space-x-2 px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200 transition-all text-sm font-bold text-slate-600"
-                >
-                  <Home size={16} />
-                  <span>Home</span>
-                </button>
-                <button 
-                  onClick={handleLogout}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-full bg-red-50 hover:bg-red-100 transition-all text-sm font-bold text-red-600"
-                >
-                  <LogOut size={16} />
-                  <span>Exit</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[1,2,3,4,5,6,7,8,9,10,11].map(i => (
-                <div 
-                  key={i} 
-                  className="group relative aspect-[2/3] overflow-hidden rounded-2xl cursor-pointer shadow-md hover:shadow-xl transition-all duration-300"
-                  onClick={() => setSelectedImage(`/assets/img${i}.jpg`)}
-                >
-                  <img 
-                    src={`/assets/img${i}.jpg`} 
-                    alt={`Briefing ${i}`} 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                  />
-                  <div className="absolute inset-0 bg-teal-900/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
-                    <div className="bg-white/90 p-3 rounded-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                      <Search className="text-teal-600" size={20} />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Full Image Modal */}
-          {selectedImage && (
-            <div 
-              className="fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-md flex items-center justify-center p-4 md:p-12 animate-fade-in"
-              onClick={() => setSelectedImage(null)}
+          <div className="mt-8 flex items-center justify-center space-x-4">
+            <button 
+              onClick={() => navigate('/')} 
+              className="flex items-center space-x-2 px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200 transition-all text-sm font-bold text-slate-600"
             >
-              <button 
-                className="absolute top-8 right-8 text-white/50 hover:text-white transition-colors bg-white/10 p-3 rounded-full hover:bg-white/20"
-                onClick={() => setSelectedImage(null)}
-              >
-                <LogOut size={24} className="rotate-90" />
-              </button>
-              <img 
-                src={selectedImage} 
-                alt="Full size" 
-                className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl border border-white/10"
-                onClick={(e) => e.stopPropagation()}
-              />
-            </div>
-          )}
+              <Home size={16} />
+              <span>Home</span>
+            </button>
+            <button 
+              onClick={handleLogout}
+              className="flex items-center space-x-2 px-4 py-2 rounded-full bg-red-50 hover:bg-red-100 transition-all text-sm font-bold text-red-600"
+            >
+              <LogOut size={16} />
+              <span>Exit</span>
+            </button>
+          </div>
         </div>
       </footer>
     </div>
