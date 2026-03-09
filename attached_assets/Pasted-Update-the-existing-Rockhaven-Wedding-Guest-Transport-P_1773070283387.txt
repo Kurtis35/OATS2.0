@@ -1,0 +1,175 @@
+Update the existing Rockhaven Wedding Guest Transport Portal.
+
+Do NOT rebuild the site or change the overall design.
+Most of the layout already works well.
+
+Only implement the following final adjustments and functionality.
+
+1. Welcome / Sign-In Screen
+
+Keep the existing background image.
+
+Add:
+
+• GETT company logo
+• Short welcome message
+
+Example message:
+
+“Welcome to the Rockhaven Wedding Guest Transport Portal.
+Please continue to submit your transport booking and view shuttle schedules.”
+
+No extra pages should be created.
+
+2. Logo Placement
+
+Ensure the GETT logo appears on every page/section of the portal.
+
+3. Rename Section
+
+Change:
+
+Lodge Pickup Finder
+
+To:
+
+Pickup Schedule
+
+4. Remove These Sections Completely
+
+Remove the following sections:
+
+Master Schedule
+Elgin Weather
+Rural Roads
+Prompt Arrival
+
+5. FAQ Change
+
+Remove this question:
+
+"What should I wear in Elgin weather?"
+
+Leave the rest of the FAQ unchanged.
+
+6. Booking Form Changes
+
+The Transport RSVP form must contain only 4 steps.
+
+STEP 1 — Guest Details
+
+Fields:
+
+Full Name
+Surname
+Email
+Phone Number
+
+STEP 2 — Accommodation + Passengers
+
+Guest selects accommodation:
+
+Rockhaven Lodge
+Elgin Valley Inn
+Orchard Guest House
+Other Accommodation
+
+If Other Accommodation is selected, show a text input field.
+
+Add field:
+
+Total Pax You Book For
+
+This replaces passenger name fields.
+
+Do NOT collect individual passenger names.
+
+STEP 3 — Evening Shuttle
+
+Guest must choose one of 3 shuttle options.
+
+Remove Preferred Pickup Shuttle.
+
+STEP 4 — Additional Services
+
+Rename section to:
+
+Additional Services
+
+Options:
+
+Airport Transfer
+Wine Tour
+Day Tour
+
+Airport Transfer must show a dropdown:
+
+One Way Transfer
+Return Transfer
+
+7. Pickup Schedule
+
+Section name:
+
+Pickup Schedule
+
+Display shuttle pickup times for:
+
+Rockhaven Lodge
+Elgin Valley Inn
+Orchard Guest House
+
+These times must load from Google Sheets so they can be updated by the admin.
+
+8. Services Section Changes
+
+Remove the Gallery completely.
+
+Create sections:
+
+Airport Transfers
+Exclusive Rockhaven Wedding Experiences
+Other Services
+
+Airport Transfers
+
+Add a short description explaining how to book airport transfers.
+
+Exclusive Rockhaven Wedding Experiences
+
+Rename Wine Tours + Day Tours to:
+
+Exclusive Rockhaven Wedding Experiences
+
+Display the provided tour flyers.
+
+Other Services
+
+Display the provided flyer only.
+
+No description required.
+
+9. Design Improvements
+
+Do not redesign the portal.
+
+Only improve:
+
+• Typography
+• Color contrast
+• Bold headings
+• Professional appearance
+
+The portal should look clean, bold, and professional.
+
+10. Google Sheets Integration
+
+Transport bookings must be saved to Google Sheets using a Google Apps Script Web App.
+
+The booking form should send data using JavaScript fetch().
+
+This allows the admin to view all bookings in the sheet.
+
+Shuttle pickup times should also be loaded from the Google Sheet so the admin can edit times directly.
+
+The portal must remain 100% frontend-only so it works with Git deployment and hosting on Netlify.
