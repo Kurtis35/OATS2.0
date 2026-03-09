@@ -62,6 +62,12 @@ interface WeddingDetails {
   lodgeTimes: Record<string, { afternoon: string; evening: string }>;
 }
 
+const ACCOMMODATIONS = [
+  "Rockhaven Lodge",
+  "Elgin Valley Inn",
+  "Orchard Guest House"
+];
+
 const LODGES = [
   "Elgin River Lodge",
   "33 Viljoenshoop Road",
@@ -158,6 +164,42 @@ const WeddingPortal = () => {
     };
   });
 
+  // Fetch shuttle schedule from Google Sheets
+  useEffect(() => {
+    const fetchShuttleSchedule = async () => {
+      try {
+        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFzcrY2ndpK7obT-msMbYhg35T7k08g-1JHpF0Ciz1B8QqKfhL19u8cMbtjDGF2fQ05KwBy9mimHRc/pubhtml?gid=573437974&single=true';
+        const response = await fetch(csvUrl);
+        const html = await response.text();
+        // Extract table data from HTML - Google Sheets pubhtml returns HTML table
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const rows = doc.querySelectorAll('tr');
+        
+        const newLodgeTimes: Record<string, { afternoon: string; evening: string }> = {};
+        rows.forEach((row, idx) => {
+          if (idx === 0) return; // Skip header
+          const cells = row.querySelectorAll('td');
+          if (cells.length >= 3) {
+            const lodge = cells[0]?.textContent?.trim();
+            const afternoon = cells[1]?.textContent?.trim();
+            const evening = cells[2]?.textContent?.trim();
+            if (lodge && afternoon && evening) {
+              newLodgeTimes[lodge] = { afternoon, evening };
+            }
+          }
+        });
+        
+        if (Object.keys(newLodgeTimes).length > 0) {
+          setDetails(prev => ({ ...prev, lodgeTimes: newLodgeTimes }));
+        }
+      } catch (error) {
+        console.warn('Could not fetch shuttle schedule, using defaults', error);
+      }
+    };
+    fetchShuttleSchedule();
+  }, []);
+
   // Persistence logic - use a single source of truth and broadcast changes
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
@@ -243,23 +285,24 @@ const WeddingPortal = () => {
     setBookings(prev => [...prev, data]);
     setFormSubmitted(true);
 
-    // Send Email via mailto (fallback for client-side only)
-    const subject = encodeURIComponent(`New Wedding Transport RSVP: ${data.fullName} ${data.surname}`);
-    const body = encodeURIComponent(`
-New Wedding Transport RSVP Received:
-----------------------------------
-Name: ${data.fullName} ${data.surname}
-Email: ${data.email}
-Phone: ${data.phone}
-Guest Count: ${data.guestCount}
-Passengers: ${data.passengers.map(p => `${p.firstName} ${p.lastName}`).join(', ')}
-Accommodation: ${data.accommodation === 'Other' ? data.customAccommodation : data.accommodation}
-Shuttle: ${data.shuttleChoice}
-Services: ${data.additionalServices.join(', ')}
-Timestamp: ${data.timestamp}
-    `);
-    
-    window.location.href = `mailto:${details.contactEmail}?subject=${subject}&body=${body}`;
+    // Send data to Google Sheets via Apps Script
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyKgq_pUO2wgYmsZxLDWE81v3MIaLg4exyGh_x7CNY/dev';
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }).catch(err => {
+      console.warn('Could not reach Google Sheets, data stored locally', err);
+    });
+
+    // Reset form after 2 seconds
+    setTimeout(() => {
+      setFormSubmitted(false);
+      setRsvpStep(1);
+      setSelectedLodgeRSVP('');
+      setAdditionalServices([]);
+      setPassengers([{ firstName: '', lastName: '' }]);
+      setGuestCount(1);
+    }, 2000);
   };
 
   const downloadCSV = () => {
@@ -622,8 +665,8 @@ Timestamp: ${data.timestamp}
                       <div className="space-y-2">
                         <label className="text-xs font-black uppercase tracking-widest text-slate-400">Select Accommodation</label>
                         <select required value={selectedLodgeRSVP} onChange={e => setSelectedLodgeRSVP(e.target.value)} className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:border-teal-500 outline-none">
-                          <option value="">Select lodge...</option>
-                          {LODGES.map(l => <option key={l} value={l}>{l}</option>)}
+                          <option value="">Select accommodation...</option>
+                          {ACCOMMODATIONS.map(l => <option key={l} value={l}>{l}</option>)}
                           <option value="Other">Other Accommodation</option>
                         </select>
                       </div>
@@ -674,9 +717,7 @@ Timestamp: ${data.timestamp}
                         <div className="grid md:grid-cols-2 gap-4">
                           {[
                             { id: 'airport', label: 'Airport Transfer', icon: <Plane size={18}/> },
-                            { id: 'wine', label: 'Elgin Wine Tour', icon: <Wine size={18}/> },
-                            { id: 'sight', label: 'Pre-Wedding Sightseeing', icon: <Camera size={18}/> },
-                            { id: 'recovery', label: 'Recovery Day Wine Tour', icon: <Map size={18}/> }
+                            { id: 'wedding', label: 'Exclusive Rockhaven Wedding Experiences', icon: <Wine size={18}/> }
                           ].map(service => (
                             <label key={service.id} className="flex items-center p-6 rounded-2xl bg-slate-50 border border-slate-100 cursor-pointer hover:bg-white hover:shadow-lg transition-all group">
                               <input 
@@ -820,7 +861,6 @@ Timestamp: ${data.timestamp}
           </div>
           <div className="space-y-4">
             {[
-              { q: "What should I wear in Elgin weather?", a: "The valley is beautiful but can get chilly at night. We recommend formal wedding attire with a warm coat or wrap for the evening reception." },
               { q: "When should I be ready for my shuttle?", a: "Please be waiting in the main reception or driveway area of your lodge at least 10 minutes before the scheduled pickup time." },
               { q: "Who do I contact if I need help?", a: "For transport issues, contact Adam via WhatsApp. For general wedding queries, please refer to the main invitation." },
               { q: "Are the roads safe at night?", a: "While the main roads are fine, farm roads are narrow and dark. Our professional drivers are experienced with the local terrain." },

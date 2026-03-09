@@ -1,0 +1,199 @@
+Update the existing Rockhaven Wedding Guest Transport Portal.
+
+Do NOT rebuild the portal from scratch.
+Modify the existing pages and structure while keeping the current layout and navigation intact.
+
+The goal is to:
+
+• Implement Google Sheets booking integration
+• Simplify the portal based on feedback
+• Keep the design minimal and world-class
+• Ensure the portal remains 100% frontend-only
+
+Use only:
+
+HTML
+CSS
+Vanilla JavaScript
+
+No backend server.
+No database.
+
+The portal must remain compatible with Git deployment and hosting on Netlify.
+
+GOOGLE SHEETS BOOKING INTEGRATION
+
+Transport bookings must be stored in Google Sheets using a Google Apps Script Web App endpoint.
+
+Use this endpoint:
+
+https://script.google.com/macros/s/AKfycbyKgq_pUO2wgYmsZxLDWE81v3MIaLg4exyGh_x7CNY/dev
+
+When the booking form is submitted:
+
+1 Prevent page reload
+2 Collect all form data
+3 Send data to the Apps Script endpoint using fetch
+
+Example structure:
+
+fetch(SCRIPT_URL, {
+method: "POST",
+body: JSON.stringify(data)
+})
+
+After successful submission:
+
+Display confirmation message:
+
+"Thank you. Your transport booking has been received."
+
+Then reset the form.
+
+Admins must be able to view all bookings directly inside Google Sheets.
+
+SHUTTLE PICKUP SCHEDULE (GOOGLE SHEETS)
+
+The pickup schedule must load dynamically from the published Google Sheets CSV.
+
+Use this sheet:
+
+https://docs.google.com/spreadsheets/d/e/2PACX-1vRFzcrY2ndpK7obT-msMbYhg35T7k08g-1JHpF0Ciz1B8QqKfhL19u8cMbtjDGF2fQ05KwBy9mimHRc/pubhtml?gid=573437974&single=true
+
+Use JavaScript to:
+
+• Fetch the CSV
+• Parse the shuttle times
+• Display pickup times in the Pickup Schedule section
+
+Admins must be able to change shuttle times directly in Google Sheets, and the website should update automatically.
+
+BOOKING FORM CHANGES
+
+Keep the existing form but modify it as follows.
+
+STEP 1 — Guest Details
+
+Fields:
+
+Full Name
+Surname
+Email
+Phone Number
+
+STEP 2 — Accommodation
+
+Dropdown options:
+
+Rockhaven Lodge
+Elgin Valley Inn
+Orchard Guest House
+Other Accommodation
+
+If Other Accommodation is selected, show a text input field.
+
+STEP 3 — Passenger Details
+
+Add field:
+
+Total Passengers in Group
+
+When selected, dynamically generate passenger name fields.
+
+Example:
+
+Passenger 1 Name
+Passenger 2 Name
+Passenger 3 Name
+
+STEP 4 — Additional Services
+
+Checkbox options:
+
+Airport Transfer
+Exclusive Rockhaven Wedding Experiences
+
+PORTAL CONTENT CHANGES (FROM WHATSAPP FEEDBACK)
+
+Simplify the portal.
+
+Remove unnecessary complexity and keep the experience clean and premium.
+
+Changes required:
+
+• Remove the gallery section from the Services page
+• Keep the design minimal and elegant
+• Avoid excessive text or clutter
+
+The portal should feel luxury and simple, similar to high-end hospitality websites.
+
+SERVICES PAGE CHANGES
+
+Remove the gallery completely.
+
+Create three sections:
+
+Airport Transfers
+Exclusive Rockhaven Wedding Experiences
+Other Services
+
+Display the provided flyer images as responsive cards.
+
+Do not add long descriptions.
+
+FAQ SECTION CHANGE
+
+Remove the question:
+
+"What should I wear in Elgin weather?"
+
+Keep the FAQ in a clean accordion layout.
+
+PICKUP SCHEDULE DESIGN
+
+Display shuttle pickup times using modern cards.
+
+Example cards:
+
+Afternoon Shuttle
+Evening Shuttle
+
+When the guest selects their accommodation in the form, highlight the relevant pickup schedule.
+
+DESIGN IMPROVEMENTS
+
+Keep the design minimal, calm, and world-class.
+
+Use:
+
+• Clean modern fonts
+• Large white space
+• Soft green accent colors
+• Rounded cards
+• Subtle shadows
+• Smooth hover animations
+
+The portal should feel premium and wedding-focused.
+
+FINAL RESULT
+
+Guests can:
+
+• Submit transport bookings
+• Add passengers
+• Select accommodation
+• Request airport transfers
+• View pickup schedules
+
+Admin can:
+
+• View bookings in Google Sheets
+• Edit shuttle pickup times
+• Export guest lists
+
+The portal remains:
+
+• Frontend only
+• Git deployable
+• Netlify compatible
+• Powered by Google Sheets
