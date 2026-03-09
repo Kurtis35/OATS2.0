@@ -127,6 +127,7 @@ const WeddingPortal = () => {
   const [selectedAccommodation, setSelectedAccommodation] = useState('');
   const [customAccommodation, setCustomAccommodation] = useState('');
   const [shuttleOption, setShuttleOption] = useState('');
+  const [shuttleTime, setShuttleTime] = useState('');
   const [additionalServices, setAdditionalServices] = useState<string[]>([]);
   const [airportTransferType, setAirportTransferType] = useState<'One Way Transfer' | 'Return Transfer' | ''>('');
 

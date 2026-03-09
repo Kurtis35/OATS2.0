@@ -12,14 +12,31 @@ const BookingForm = () => {
     time: '',
     passengers: '1',
     serviceType: 'airport-transfer',
-    specialRequests: ''
+    specialRequests: '',
+    shuttleTime: ''
   });
+
+  const [step, setStep] = useState(1);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const submitToGoogleSheets = async (data: any) => {
+    try {
+      const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyKgq_pUO2wgYmsZxLDWE81v3MIaLg4exyGh_x7CNY/exec';
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, type: 'general_booking' })
+      });
+    } catch (error) {
+      console.error('Google Sheets error:', error);
+    }
   };
 
   const generateWhatsAppMessage = () => {
@@ -34,6 +51,7 @@ const BookingForm = () => {
 • Destination: ${formData.destination}
 • Date: ${formData.date}
 • Time: ${formData.time}
+${formData.shuttleTime ? `• Preferred Shuttle: ${formData.shuttleTime}` : ''}
 • Passengers: ${formData.passengers}
 ${formData.specialRequests ? `• Special Requests: ${formData.specialRequests}` : ''}
 
@@ -57,6 +75,7 @@ Pickup Location: ${formData.pickupLocation}
 Destination: ${formData.destination}
 Date: ${formData.date}
 Time: ${formData.time}
+${formData.shuttleTime ? `Preferred Shuttle: ${formData.shuttleTime}` : ''}
 Number of Passengers: ${formData.passengers}
 ${formData.specialRequests ? `Special Requests: ${formData.specialRequests}` : ''}
 
@@ -70,236 +89,223 @@ ${formData.name}`);
     return { subject, body };
   };
 
-  const handleWhatsAppBooking = () => {
+  const handleFinalBooking = async (method: 'whatsapp' | 'email') => {
     if (!formData.name || !formData.phone || !formData.pickupLocation || !formData.destination || !formData.date || !formData.time) {
       alert('Please fill in all required fields before booking.');
       return;
     }
 
-    const whatsappMessage = generateWhatsAppMessage();
-    const whatsappUrl = `https://wa.me/27795036849?text=${whatsappMessage}`;
-    window.open(whatsappUrl, '_blank');
-  };
+    await submitToGoogleSheets(formData);
 
-  const handleEmailBooking = () => {
-    if (!formData.name || !formData.email || !formData.pickupLocation || !formData.destination || !formData.date || !formData.time) {
-      alert('Please fill in all required fields before booking.');
-      return;
+    if (method === 'whatsapp') {
+      const whatsappMessage = generateWhatsAppMessage();
+      const whatsappUrl = `https://wa.me/27795036849?text=${whatsappMessage}`;
+      window.open(whatsappUrl, '_blank');
+    } else {
+      const { subject, body } = generateEmailBody();
+      const emailUrl = `mailto:info@overbergtransfers.com?subject=${subject}&body=${body}`;
+      window.location.href = emailUrl;
     }
-
-    const { subject, body } = generateEmailBody();
-    const emailUrl = `mailto:info@overbergtransfers.com?subject=${subject}&body=${body}`;
-    window.location.href = emailUrl;
   };
 
   const handlePhoneCall = () => {
     window.location.href = 'tel:+27795036849';
   };
 
+  const nextStep = () => setStep(s => Math.min(s + 1, 4));
+  const prevStep = () => setStep(s => Math.max(s - 1, 1));
+
+  const isStepValid = () => {
+    if (step === 1) return formData.name && formData.phone && formData.email;
+    if (step === 2) return formData.pickupLocation && formData.destination;
+    if (step === 3) return formData.date && formData.time;
+    return true;
+  };
+
   return (
-    <section id="booking" className="py-12 md:py-20 bg-gradient-to-br from-gray-50 to-teal-50">
-      <div className="container mx-auto px-4">
+    <section id="booking" className="py-12 md:py-24 bg-slate-900 text-white relative overflow-hidden">
+      {/* Background Decor */}
+      <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-teal-500 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-500 rounded-full blur-[120px]" />
+      </div>
+
+      <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8 md:mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Book Your Transfer</h2>
-            <p className="text-lg md:text-xl text-gray-600 px-4">
-              Fill out the form below and choose your preferred booking method
+          <div className="text-center mb-12 md:mb-16">
+            <span className="inline-block px-4 py-1 bg-teal-500/10 text-teal-400 rounded-full text-sm font-bold tracking-widest uppercase mb-4 border border-teal-500/20">
+              Premium Service
+            </span>
+            <h2 className="text-4xl md:text-6xl font-black mb-6 bg-gradient-to-r from-white via-teal-200 to-white bg-clip-text text-transparent italic">
+              Experience the Journey
+            </h2>
+            <p className="text-xl text-slate-400 font-light max-w-2xl mx-auto">
+              Bespoke transport solutions tailored to your schedule. Choose your preferred method to confirm your booking.
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-xl p-4 md:p-8">
-            <div className="grid md:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Full Name *
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-base"
-                  placeholder="Enter your full name"
-                  required
+          <div className="bg-white/5 backdrop-blur-2xl rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden">
+            {/* Progress Bar */}
+            <div className="flex h-1.5 bg-white/5">
+              {[1, 2, 3, 4].map((i) => (
+                <div 
+                  key={i} 
+                  className={`flex-1 transition-all duration-700 ${i <= step ? 'bg-gradient-to-r from-teal-500 to-blue-500' : ''}`}
                 />
-              </div>
+              ))}
+            </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Phone Number *
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-base"
-                  placeholder="+27 XX XXX XXXX"
-                  required
-                />
-              </div>
+            <div className="p-8 md:p-12">
+              {step === 1 && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <h3 className="text-2xl font-bold flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-teal-500/20 flex items-center justify-center text-teal-400 border border-teal-500/30">1</div>
+                    Personal Details
+                  </h3>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-xs font-black uppercase tracking-widest text-slate-400">Full Name</label>
+                      <input type="text" name="name" value={formData.name} onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:border-teal-500 outline-none transition-all placeholder:text-white/20" placeholder="John Doe" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-black uppercase tracking-widest text-slate-400">Phone Number</label>
+                      <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:border-teal-500 outline-none transition-all placeholder:text-white/20" placeholder="+27 ..." />
+                    </div>
+                    <div className="md:col-span-2 space-y-2">
+                      <label className="text-xs font-black uppercase tracking-widest text-slate-400">Email Address</label>
+                      <input type="email" name="email" value={formData.email} onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:border-teal-500 outline-none transition-all placeholder:text-white/20" placeholder="john@example.com" />
+                    </div>
+                  </div>
+                </div>
+              )}
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-base"
-                  placeholder="your.email@example.com"
-                  required
-                />
-              </div>
+              {step === 2 && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <h3 className="text-2xl font-bold flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-teal-500/20 flex items-center justify-center text-teal-400 border border-teal-500/30">2</div>
+                    Route Information
+                  </h3>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-xs font-black uppercase tracking-widest text-slate-400">Service Type</label>
+                      <select name="serviceType" value={formData.serviceType} onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:border-teal-500 outline-none transition-all appearance-none cursor-pointer">
+                        <option value="airport-transfer">Airport Transfer</option>
+                        <option value="private-tour">Private Tour</option>
+                        <option value="wine-tour">Wine Tour</option>
+                        <option value="group-transfer">Group Transfer</option>
+                        <option value="chauffeur-service">Chauffeur Service</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-black uppercase tracking-widest text-slate-400">Passengers</label>
+                      <select name="passengers" value={formData.passengers} onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:border-teal-500 outline-none transition-all appearance-none cursor-pointer">
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(num => (
+                          <option key={num} value={num}>{num} {num === 1 ? 'Passenger' : 'Passengers'}</option>
+                        ))}
+                        <option value="13+">13+ Passengers</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-black uppercase tracking-widest text-slate-400">Pickup Location</label>
+                      <input type="text" name="pickupLocation" value={formData.pickupLocation} onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:border-teal-500 outline-none transition-all placeholder:text-white/20" placeholder="e.g. Cape Town Airport" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-black uppercase tracking-widest text-slate-400">Destination</label>
+                      <input type="text" name="destination" value={formData.destination} onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:border-teal-500 outline-none transition-all placeholder:text-white/20" placeholder="e.g. Rockhaven Lodge" />
+                    </div>
+                  </div>
+                </div>
+              )}
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Service Type
-                </label>
-                <select
-                  name="serviceType"
-                  value={formData.serviceType}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-base"
+              {step === 3 && (
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <h3 className="text-2xl font-bold flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-teal-500/20 flex items-center justify-center text-teal-400 border border-teal-500/30">3</div>
+                    Schedule
+                  </h3>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-xs font-black uppercase tracking-widest text-slate-400">Date</label>
+                      <input type="date" name="date" value={formData.date} onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:border-teal-500 outline-none transition-all [color-scheme:dark]" />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-black uppercase tracking-widest text-slate-400">Time</label>
+                      <input type="time" name="time" value={formData.time} onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:border-teal-500 outline-none transition-all [color-scheme:dark]" />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {step === 4 && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <h3 className="text-2xl font-bold flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-teal-500/20 flex items-center justify-center text-teal-400 border border-teal-500/30">4</div>
+                    Final Options
+                  </h3>
+                  
+                  <div className="space-y-4">
+                    <label className="text-xs font-black uppercase tracking-widest text-slate-400 block">Afternoon & Evening Shuttle Preference</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                      {['10:00 PM', '12:00 AM', '01:00 AM', 'Not Required'].map((t) => (
+                        <button
+                          key={t}
+                          onClick={() => setFormData({ ...formData, shuttleTime: t })}
+                          className={`px-4 py-4 rounded-2xl border transition-all text-sm font-bold ${formData.shuttleTime === t ? 'bg-teal-500 border-teal-500 text-white shadow-lg shadow-teal-500/20' : 'bg-white/5 border-white/10 text-slate-300 hover:border-white/30'}`}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-black uppercase tracking-widest text-slate-400">Special Requests</label>
+                    <textarea name="specialRequests" value={formData.specialRequests} onChange={handleInputChange} rows={3} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 focus:border-teal-500 outline-none transition-all placeholder:text-white/20 resize-none" placeholder="Any extra details..." />
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <button onClick={() => handleFinalBooking('whatsapp')} className="group relative overflow-hidden bg-green-500 text-white px-8 py-5 rounded-2xl font-black uppercase tracking-widest text-sm hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 shadow-xl shadow-green-500/20">
+                      <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+                      <MessageCircle size={20} className="relative z-10" />
+                      <span className="relative z-10">WhatsApp Booking</span>
+                    </button>
+                    <button onClick={() => handleFinalBooking('email')} className="group relative overflow-hidden bg-white text-slate-900 px-8 py-5 rounded-2xl font-black uppercase tracking-widest text-sm hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 shadow-xl shadow-white/10">
+                      <div className="absolute inset-0 bg-slate-900/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+                      <Mail size={20} className="relative z-10" />
+                      <span className="relative z-10">Email Booking</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-12 flex items-center justify-between pt-8 border-t border-white/10">
+                <button 
+                  onClick={prevStep} 
+                  disabled={step === 1}
+                  className={`flex items-center gap-2 text-sm font-black uppercase tracking-widest transition-all ${step === 1 ? 'opacity-0' : 'text-slate-400 hover:text-white'}`}
                 >
-                  <option value="airport-transfer">Airport Transfer</option>
-                  <option value="private-tour">Private Tour</option>
-                  <option value="wine-tour">Wine Tour</option>
-                  <option value="group-transfer">Group Transfer</option>
-                  <option value="chauffeur-service">Chauffeur Service</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  <MapPin className="inline mr-1" size={16} />
-                  Pickup Location *
-                </label>
-                <input
-                  type="text"
-                  name="pickupLocation"
-                  value={formData.pickupLocation}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-base"
-                  placeholder="e.g., Cape Town International Airport"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  <MapPin className="inline mr-1" size={16} />
-                  Destination *
-                </label>
-                <input
-                  type="text"
-                  name="destination"
-                  value={formData.destination}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-base"
-                  placeholder="e.g., Hermanus, Grabouw, etc."
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  <Calendar className="inline mr-1" size={16} />
-                  Date *
-                </label>
-                <input
-                  type="date"
-                  name="date"
-                  value={formData.date}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-base"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  <Clock className="inline mr-1" size={16} />
-                  Time *
-                </label>
-                <input
-                  type="time"
-                  name="time"
-                  value={formData.time}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-base"
-                  required
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  <Users className="inline mr-1" size={16} />
-                  Number of Passengers
-                </label>
-                <select
-                  name="passengers"
-                  value={formData.passengers}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-base"
-                >
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(num => (
-                    <option key={num} value={num}>{num} {num === 1 ? 'Passenger' : 'Passengers'}</option>
+                  Back
+                </button>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4].map(i => (
+                    <div key={i} className={`w-2 h-2 rounded-full transition-all duration-500 ${i === step ? 'w-8 bg-teal-500' : 'bg-white/20'}`} />
                   ))}
-                  <option value="13+">13+ Passengers</option>
-                </select>
+                </div>
+                {step < 4 ? (
+                  <button 
+                    onClick={nextStep} 
+                    disabled={!isStepValid()}
+                    className={`bg-teal-500 text-white px-8 py-3 rounded-xl font-black uppercase tracking-widest text-xs transition-all hover:scale-105 active:scale-95 shadow-lg shadow-teal-500/20 disabled:opacity-50 disabled:hover:scale-100`}
+                  >
+                    Next Step
+                  </button>
+                ) : (
+                  <button onClick={handlePhoneCall} className="text-teal-400 text-sm font-black uppercase tracking-widest hover:text-teal-300 transition-colors">
+                    Need Help? Call Us
+                  </button>
+                )}
               </div>
-            </div>
-
-            <div className="mb-6 md:mb-8">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Special Requests or Additional Information
-              </label>
-              <textarea
-                name="specialRequests"
-                value={formData.specialRequests}
-                onChange={handleInputChange}
-                rows={4}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-base resize-none"
-                placeholder="Any special requirements, flight details, or additional information..."
-              />
-            </div>
-
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <button
-                onClick={handleWhatsAppBooking}
-                className="w-full bg-green-600 text-white px-6 md:px-8 py-4 rounded-lg font-semibold hover:bg-green-700 transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl text-base md:text-lg"
-              >
-                <MessageCircle size={20} />
-                <span>Book via WhatsApp</span>
-              </button>
-              
-              <button
-                onClick={handleEmailBooking}
-                className="w-full bg-blue-600 text-white px-6 md:px-8 py-4 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl text-base md:text-lg"
-              >
-                <Mail size={20} />
-                <span>Book via Email</span>
-              </button>
-              
-              <button
-                onClick={handlePhoneCall}
-                className="w-full sm:col-span-2 lg:col-span-1 bg-teal-600 text-white px-6 md:px-8 py-4 rounded-lg font-semibold hover:bg-teal-700 transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl text-base md:text-lg"
-              >
-                <Phone size={20} />
-                <span>Call to Book</span>
-              </button>
-            </div>
-
-            <div className="mt-6 p-4 bg-teal-50 rounded-lg">
-              <p className="text-sm text-teal-800">
-                <strong>Booking Options:</strong> Choose your preferred method above. WhatsApp provides instant messaging, 
-                email allows detailed communication, or call us directly for immediate assistance. All methods will include 
-                your booking details for quick processing.
-              </p>
             </div>
           </div>
         </div>
