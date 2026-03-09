@@ -285,16 +285,41 @@ const WeddingPortal = () => {
     setBookings(prev => [...prev, data]);
     setFormSubmitted(true);
 
-    // Send data to Google Sheets via Apps Script
+    // Send data to Google Sheets via Apps Script with no-cors mode
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyKgq_pUO2wgYmsZxLDWE81v3MIaLg4exyGh_x7CNY/dev';
     fetch(SCRIPT_URL, {
       method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(data)
+    }).then(() => {
+      console.log('Booking sent to Google Sheets');
     }).catch(err => {
       console.warn('Could not reach Google Sheets, data stored locally', err);
     });
 
-    // Reset form after 2 seconds
+    // Also send via email as fallback
+    const subject = encodeURIComponent(`New Wedding Transport RSVP: ${data.fullName} ${data.surname}`);
+    const body = encodeURIComponent(`
+New Wedding Transport RSVP Received:
+----------------------------------
+Name: ${data.fullName} ${data.surname}
+Email: ${data.email}
+Phone: ${data.phone}
+Guest Count: ${data.guestCount}
+Passengers: ${data.passengers.map(p => `${p.firstName} ${p.lastName}`).join(', ')}
+Accommodation: ${data.accommodation === 'Other' ? data.customAccommodation : data.accommodation}
+Shuttle: ${data.shuttleChoice}
+Services: ${data.additionalServices.join(', ')}
+Timestamp: ${data.timestamp}
+    `);
+    
+    // Open email client - this ensures the admin is notified
+    window.location.href = `mailto:${details.contactEmail}?subject=${subject}&body=${body}`;
+
+    // Reset form after 3 seconds
     setTimeout(() => {
       setFormSubmitted(false);
       setRsvpStep(1);
@@ -302,7 +327,7 @@ const WeddingPortal = () => {
       setAdditionalServices([]);
       setPassengers([{ firstName: '', lastName: '' }]);
       setGuestCount(1);
-    }, 2000);
+    }, 3000);
   };
 
   const downloadCSV = () => {
