@@ -1,0 +1,317 @@
+Update the Rockhaven Wedding Guest Transport Portal to implement a fully functional wedding transport booking system.
+
+The portal must use Google Sheets as the data store while keeping the website 100% frontend-only so it works with Git deployment and hosting on Netlify.
+
+Use only:
+
+HTML
+CSS
+Vanilla JavaScript
+
+Do NOT use:
+
+Backend servers
+Databases
+Frameworks
+
+The portal must be fast, mobile-first, and extremely simple to use.
+
+IMPORTANT CONTEXT
+
+The Wedding Portal is a section of an existing website, not a full website.
+
+Users access it by clicking “Wedding Portal” on the main website.
+
+Inside this section there are three internal portal pages.
+
+These pages must live inside a folder:
+
+/wedding-portal/
+
+Structure:
+
+/wedding-portal
+   index.html
+   portal.html
+   services.html
+   style.css
+   script.js
+
+This allows the portal to load like:
+
+site.com/wedding-portal
+site.com/wedding-portal/portal
+site.com/wedding-portal/services
+
+This ensures it works perfectly when deployed on Netlify.
+
+DESIGN PHILOSOPHY
+
+The design must feel minimal, luxury, and world-class.
+
+Avoid clutter and unnecessary sections.
+
+The experience should feel similar to high-end hospitality websites.
+
+Use:
+
+• Clean modern typography
+• Large white space
+• Soft green accent colors
+• Elegant spacing
+• Rounded cards
+• Subtle shadows
+• Smooth hover animations
+
+The overall feeling should be calm, premium, and wedding-focused.
+
+Use high-quality imagery of:
+
+• Elgin vineyards
+• Wedding scenery
+• Luxury transport vehicles
+
+The portal must work perfectly on mobile phones.
+
+GOOGLE SHEETS INTEGRATION
+
+All booking data must be sent to Google Sheets via Google Apps Script Web App.
+
+Use this endpoint:
+
+https://script.google.com/macros/s/AKfycbyKgq_pUO2wgYmsZxLDWE81v3MIaLg4exyGh_x7CNY/dev
+
+Form submissions must send data using a POST request.
+
+Example logic:
+
+fetch(SCRIPT_URL, {
+  method: "POST",
+  body: JSON.stringify(data)
+})
+
+Admins will be able to:
+
+• View bookings in Google Sheets
+• Export guest lists
+• Manage passenger counts
+
+No backend server should exist.
+
+SHUTTLE SCHEDULE DATA
+
+Pickup schedules must load dynamically from this published Google Sheets CSV:
+
+https://docs.google.com/spreadsheets/d/e/2PACX-1vRFzcrY2ndpK7obT-msMbYhg35T7k08g-1JHpF0Ciz1B8QqKfhL19u8cMbtjDGF2fQ05KwBy9mimHRc/pubhtml?gid=573437974&single=true
+
+JavaScript should:
+
+Fetch the CSV
+
+Parse the shuttle times
+
+Display them in the portal
+
+Admins must be able to change pickup times directly in Google Sheets and the website should automatically update.
+
+PORTAL NAVIGATION
+
+Each page must show:
+
+GETT logo
+Minimal navigation
+
+Navigation links:
+
+Welcome
+Wedding Portal
+Services
+
+Navigation must be mobile responsive.
+
+PAGE 1 — WELCOME PAGE
+
+Create a clean landing page.
+
+Display the GETT logo prominently.
+
+Title:
+
+Rockhaven Wedding Guest Transport Portal
+
+Short description explaining the portal allows guests to:
+
+• Submit transport bookings
+• View pickup schedules
+• Arrange airport transfers
+• Explore additional services
+
+Add a primary button:
+
+Enter Wedding Portal
+
+This links to:
+
+portal.html
+
+Use a large hero image of Elgin vineyards or wedding scenery.
+
+Keep the layout simple and elegant.
+
+PAGE 2 — WEDDING PORTAL
+
+This is the main transport booking page.
+
+Sections must appear in this order:
+
+1 Booking Form
+2 Pickup Schedule
+3 Travel Tips & Support
+4 FAQ
+
+BOOKING FORM
+
+STEP 1 — Guest Details
+
+Fields:
+
+Full Name
+Surname
+Email
+Phone Number
+
+STEP 2 — Accommodation
+
+Dropdown options:
+
+Rockhaven Lodge
+Elgin Valley Inn
+Orchard Guest House
+Other Accommodation
+
+If Other Accommodation is selected, display a text input field.
+
+STEP 3 — Passenger Details
+
+Field:
+
+Total Passengers in Group
+
+When selected, dynamically generate passenger fields.
+
+Example:
+
+Passenger 1 Name
+Passenger 2 Name
+Passenger 3 Name
+
+STEP 4 — Additional Services
+
+Checkbox options:
+
+Airport Transfer
+Exclusive Rockhaven Wedding Experiences
+
+FORM SUBMISSION
+
+When the form is submitted:
+
+1 Prevent page reload
+2 Collect all form data
+3 Send data to Google Apps Script endpoint
+
+Example structure:
+
+fetch(SCRIPT_URL, {
+method: "POST",
+body: JSON.stringify(data)
+})
+
+After successful submission:
+
+Display confirmation message:
+
+"Thank you. Your transport booking has been received."
+
+Then reset the form.
+
+PICKUP SCHEDULE
+
+Section title:
+
+Pickup Schedule
+
+Display shuttle pickup times in modern cards.
+
+Example cards:
+
+Afternoon Shuttle
+Evening Shuttle
+
+When the guest selects their accommodation in the booking form, highlight the relevant pickup times.
+
+All schedule data must load from the Google Sheets CSV.
+
+TRAVEL TIPS & SUPPORT
+
+Create a few helpful cards such as:
+
+Elgin Weather
+Be Ready for Shuttle Pickup
+Emergency Contact Information
+
+Keep this section short and useful.
+
+FAQ
+
+Display FAQs using a clean accordion layout.
+
+Remove the question:
+
+"What should I wear in Elgin weather?"
+
+Use smooth open/close animations.
+
+PAGE 3 — SERVICES
+
+Remove the gallery completely.
+
+Create two sections:
+
+Airport Transfers
+Exclusive Rockhaven Wedding Experiences
+
+Display the provided flyer images as responsive cards.
+
+Add another section:
+
+Other Services
+
+Display the provided flyer.
+
+Do NOT include additional descriptions.
+
+Keep the layout minimal and premium.
+
+FINAL RESULT
+
+Guests can:
+
+• Submit transport bookings
+• Add passengers
+• Select accommodation
+• Request airport transfers
+• Request wedding experiences
+
+Admins can:
+
+• View all bookings in Google Sheets
+• Edit shuttle times in the sheet
+• Export guest transport data
+
+The portal remains:
+
+• 100% frontend
+• Git deployable
+• Netlify compatible
+• Google Sheets powered
