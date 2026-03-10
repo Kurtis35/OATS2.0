@@ -290,6 +290,14 @@ const WeddingPortal = () => {
           <div className="absolute inset-0 bg-black/50 z-10" />
           <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80" alt="Wedding" className="absolute inset-0 w-full h-full object-cover animate-subtle-zoom" />
           <div className="relative z-20 container mx-auto px-4 text-center">
+            <div className="mb-8">
+              <img 
+                src="/oats_logos.jpg" 
+                alt="Overberg Airport Transfers" 
+                className="h-16 md:h-20 w-auto mx-auto mb-6"
+              />
+              <h3 className="text-lg md:text-xl font-bold text-white mb-4">Welcome to Overberg Airport Transfers</h3>
+            </div>
             <div className="inline-block mb-6 px-4 py-1 border border-white/30 rounded-full backdrop-blur-md text-xs font-bold uppercase tracking-widest">Premium Transport Portal</div>
             <h1 className="text-5xl md:text-7xl font-serif italic mb-6">Rockhaven Wedding</h1>
             <p className="text-xl md:text-2xl font-light mb-12 tracking-wide text-slate-200">Elgin Valley | Saturday 4 April 2026</p>
@@ -684,62 +692,7 @@ const WeddingPortal = () => {
         </div>
       </section>
 
-      {/* ADD WEDDING MOMENTS */}
-      <section className="py-24 bg-slate-50">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-serif italic text-slate-900 mb-4">Wedding Moments</h2>
-            <p className="text-lg text-slate-600">Beautiful celebrations at Rockhaven</p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="rounded-[2rem] overflow-hidden shadow-xl hover:shadow-2xl transition-all transform hover:scale-105">
-              <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80" alt="Wedding ceremony" className="w-full h-80 object-cover" />
-            </div>
-            <div className="rounded-[2rem] overflow-hidden shadow-xl hover:shadow-2xl transition-all transform hover:scale-105">
-              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80" alt="Wedding reception" className="w-full h-80 object-cover" />
-            </div>
-            <div className="rounded-[2rem] overflow-hidden shadow-xl hover:shadow-2xl transition-all transform hover:scale-105">
-              <img src="https://images.unsplash.com/photo-1519078422857-efb96f951aeb?auto=format&fit=crop&q=80" alt="Wedding celebration" className="w-full h-80 object-cover" />
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* SERVICES WITH IMAGES */}
-      <section className="py-28 bg-white relative">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-serif italic text-slate-900">Premium Services</h2>
-            <p className="text-lg text-slate-600 mt-4">Tailored for your wedding experience</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 mb-12">
-            <div className="rounded-[2rem] overflow-hidden shadow-xl">
-              <img src="https://images.unsplash.com/photo-1552820728-8ac41f1ce891?auto=format&fit=crop&q=80" alt="Airport transfer" className="w-full h-96 object-cover" />
-            </div>
-            <div className="flex flex-col justify-center space-y-6">
-              <h3 className="text-3xl font-bold text-slate-900">Airport Transfers</h3>
-              <p className="text-lg text-slate-600 leading-relaxed">Professional and reliable transport from Cape Town International Airport. Our experienced drivers ensure a smooth arrival for all your wedding guests.</p>
-              <div className="flex gap-4">
-                <button className="bg-teal-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-teal-700 transition-all">Book Now</button>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="flex flex-col justify-center space-y-6 order-2 md:order-1">
-              <h3 className="text-3xl font-bold text-slate-900">Wine & Dining Experiences</h3>
-              <p className="text-lg text-slate-600 leading-relaxed">Explore the stunning Elgin Valley wine estates. Perfect for pre-wedding celebrations and guest entertainment.</p>
-              <div className="flex gap-4">
-                <button className="bg-teal-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-teal-700 transition-all">Explore Tours</button>
-              </div>
-            </div>
-            <div className="rounded-[2rem] overflow-hidden shadow-xl order-1 md:order-2">
-              <img src="https://images.unsplash.com/photo-1510812431401-41d2cab2707d?auto=format&fit=crop&q=80" alt="Wine tasting" className="w-full h-96 object-cover" />
-            </div>
-          </div>
-        </div>
-      </section>
 
 
       {/* 4. TRAVEL TIPS & SUPPORT */}
@@ -777,8 +730,18 @@ const WeddingPortal = () => {
             <h2 className="text-4xl font-serif italic mb-4">Wedding Information</h2>
             <p className="text-slate-400">Complete guide for guests</p>
           </div>
-          <div className="rounded-[2rem] overflow-hidden shadow-2xl border-2 border-slate-100">
-            <img src="/wedding-flyer.jpg" alt="Wedding Transport Guide" className="w-full h-auto object-cover" />
+          <div className="max-w-2xl mx-auto">
+            <div 
+              className="rounded-[2rem] overflow-hidden shadow-2xl border-2 border-slate-100 cursor-pointer hover:shadow-xl transition-all hover:scale-105 group"
+              onClick={() => setSelectedImage('/wedding-flyer.jpg')}
+            >
+              <img 
+                src="/wedding-flyer.jpg" 
+                alt="Wedding Transport Guide" 
+                className="w-full h-64 md:h-80 object-cover group-hover:opacity-90 transition-opacity" 
+              />
+            </div>
+            <p className="text-center text-sm text-slate-500 mt-4">Click image to view full size</p>
           </div>
         </div>
       </section>
@@ -820,47 +783,21 @@ const WeddingPortal = () => {
              <a href="#" className="hover:text-teal-600 transition-colors"><MapPin size={20}/></a>
           </div>
 
-          <div className="mt-16">
-            <div className="flex items-center justify-between mb-8">
-              <h3 className="text-xl font-serif italic text-slate-900">Wedding Gallery</h3>
-              <div className="flex items-center space-x-4">
-                <button 
-                  onClick={() => navigate('/')} 
-                  className="flex items-center space-x-2 px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200 transition-all text-sm font-bold text-slate-600"
-                >
-                  <Home size={16} />
-                  <span>Home</span>
-                </button>
-                <button 
-                  onClick={handleLogout}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-full bg-red-50 hover:bg-red-100 transition-all text-sm font-bold text-red-600"
-                >
-                  <LogOut size={16} />
-                  <span>Exit</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[1,2,3,4,5,6,7,8,9,10,11].map(i => (
-                <div 
-                  key={i} 
-                  className="group relative aspect-[2/3] overflow-hidden rounded-2xl cursor-pointer shadow-md hover:shadow-xl transition-all duration-300"
-                  onClick={() => setSelectedImage(`/assets/img${i}.jpg`)}
-                >
-                  <img 
-                    src={`/assets/img${i}.jpg`} 
-                    alt={`Briefing ${i}`} 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                  />
-                  <div className="absolute inset-0 bg-teal-900/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
-                    <div className="bg-white/90 p-3 rounded-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                      <Search className="text-teal-600" size={20} />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="flex items-center justify-center gap-4 mt-8">
+            <button 
+              onClick={() => navigate('/')} 
+              className="flex items-center space-x-2 px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200 transition-all text-sm font-bold text-slate-600"
+            >
+              <Home size={16} />
+              <span>Home</span>
+            </button>
+            <button 
+              onClick={handleLogout}
+              className="flex items-center space-x-2 px-4 py-2 rounded-full bg-red-50 hover:bg-red-100 transition-all text-sm font-bold text-red-600"
+            >
+              <LogOut size={16} />
+              <span>Exit</span>
+            </button>
           </div>
 
           {/* Full Image Modal */}
