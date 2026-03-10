@@ -640,42 +640,104 @@ const WeddingPortal = () => {
       </section>
 
       {/* 2. LODGE PICKUP FINDER */}
-      <section className="py-28 md:py-36 bg-gradient-to-b from-white to-slate-50 relative overflow-hidden">
+      <section className="py-28 md:py-36 bg-white relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.05),transparent)]" />
-        <div className="max-w-4xl mx-auto px-4 relative z-10 text-center">
-          <div className="inline-block mb-6 px-4 py-2 bg-teal-100 text-teal-700 rounded-full text-[11px] font-black uppercase tracking-widest shadow-sm">Interactive Tool</div>
-          <h2 className="text-5xl md:text-6xl font-serif italic text-slate-900 mb-8 leading-tight">Lodge Pickup Finder</h2>
-          <p className="text-lg md:text-xl text-slate-600 font-medium mb-14 max-w-xl mx-auto leading-relaxed">Select your accommodation to discover your exact shuttle times for the day.</p>
-          
-          <div className="max-w-md mx-auto relative mb-16">
-            <select 
-              value={selectedFinderLodge}
-              onChange={e => setSelectedFinderLodge(e.target.value)}
-              className="w-full px-8 py-6 rounded-[2rem] border-2 border-slate-300 bg-white text-slate-800 font-bold focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100 appearance-none cursor-pointer transition-all text-base shadow-md"
-            >
-              <option value="">Choose your lodge...</option>
-              {LODGES.map(l => <option key={l} value={l}>{l}</option>)}
-            </select>
-            <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 text-teal-600 pointer-events-none" size={24} />
+        <div className="max-w-6xl mx-auto px-4 relative z-10">
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div className="text-left">
+              <div className="inline-block mb-6 px-4 py-2 bg-teal-100 text-teal-700 rounded-full text-[11px] font-black uppercase tracking-widest shadow-sm">Interactive Tool</div>
+              <h2 className="text-5xl md:text-6xl font-serif italic text-slate-900 mb-8 leading-tight">Lodge Pickup Finder</h2>
+              <p className="text-lg md:text-xl text-slate-600 font-medium mb-8 leading-relaxed">Select your accommodation to discover your exact shuttle times for the day.</p>
+              
+              <div className="max-w-md relative mb-12">
+                <select 
+                  value={selectedFinderLodge}
+                  onChange={e => setSelectedFinderLodge(e.target.value)}
+                  className="w-full px-8 py-6 rounded-[2rem] border-2 border-slate-300 bg-white text-slate-800 font-bold focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100 appearance-none cursor-pointer transition-all text-base shadow-md"
+                >
+                  <option value="">Choose your lodge...</option>
+                  {LODGES.map(l => <option key={l} value={l}>{l}</option>)}
+                </select>
+                <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 text-teal-600 pointer-events-none" size={24} />
+              </div>
+
+              {selectedFinderLodge && details.lodgeTimes[selectedFinderLodge] && (
+                <div className="grid grid-cols-2 gap-6 animate-fade-in">
+                  <div className="bg-teal-50 p-8 rounded-[2rem] border border-teal-100">
+                    <Sun className="mb-3 text-teal-500" size={32} />
+                    <p className="text-[10px] font-black uppercase tracking-widest text-teal-600 mb-2">Afternoon</p>
+                    <h4 className="text-4xl font-black text-teal-900">{details.lodgeTimes[selectedFinderLodge].afternoon}</h4>
+                  </div>
+                  <div className="bg-slate-900 p-8 rounded-[2rem] text-white">
+                    <Clock className="mb-3 text-teal-400" size={32} />
+                    <p className="text-[10px] font-black uppercase tracking-widest text-teal-400 mb-2">Evening</p>
+                    <h4 className="text-4xl font-black text-white">{details.lodgeTimes[selectedFinderLodge].evening}</h4>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-[2rem] overflow-hidden shadow-2xl">
+              <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80" alt="Wedding couple" className="w-full h-96 object-cover" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ADD WEDDING MOMENTS */}
+      <section className="py-24 bg-slate-50">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-serif italic text-slate-900 mb-4">Wedding Moments</h2>
+            <p className="text-lg text-slate-600">Beautiful celebrations at Rockhaven</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="rounded-[2rem] overflow-hidden shadow-xl hover:shadow-2xl transition-all transform hover:scale-105">
+              <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80" alt="Wedding ceremony" className="w-full h-80 object-cover" />
+            </div>
+            <div className="rounded-[2rem] overflow-hidden shadow-xl hover:shadow-2xl transition-all transform hover:scale-105">
+              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80" alt="Wedding reception" className="w-full h-80 object-cover" />
+            </div>
+            <div className="rounded-[2rem] overflow-hidden shadow-xl hover:shadow-2xl transition-all transform hover:scale-105">
+              <img src="https://images.unsplash.com/photo-1519078422857-efb96f951aeb?auto=format&fit=crop&q=80" alt="Wedding celebration" className="w-full h-80 object-cover" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SERVICES WITH IMAGES */}
+      <section className="py-28 bg-white relative">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-serif italic text-slate-900">Premium Services</h2>
+            <p className="text-lg text-slate-600 mt-4">Tailored for your wedding experience</p>
           </div>
 
-          {selectedFinderLodge && details.lodgeTimes[selectedFinderLodge] && (
-            <div className="grid md:grid-cols-2 gap-8 md:gap-10 animate-fade-in-up">
-              <div className="bg-gradient-to-br from-teal-50 to-teal-100 p-12 rounded-[2.5rem] border-2 border-teal-200 group hover:shadow-2xl hover:border-teal-300 transition-all duration-500 transform hover:-translate-y-2">
-                <Sun className="mx-auto text-teal-600 mb-6" size={40} />
-                <p className="text-[11px] font-black uppercase tracking-widest text-teal-700 mb-4">Afternoon Shuttle</p>
-                <h4 className="text-6xl font-black text-teal-900 mb-4">{details.lodgeTimes[selectedFinderLodge].afternoon}</h4>
-                <div className="flex items-center justify-center text-teal-800 font-bold"><CheckCircle size={18} className="mr-2"/> On Schedule</div>
-              </div>
-              <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-12 rounded-[2.5rem] border-2 border-teal-500/30 group hover:shadow-2xl hover:border-teal-500 transition-all duration-500 transform hover:-translate-y-2">
-                <Clock className="mx-auto text-teal-400 mb-6" size={40} />
-                <p className="text-[11px] font-black uppercase tracking-widest text-teal-400 mb-4">Evening Shuttle</p>
-                <h4 className="text-6xl font-black text-white mb-4">{details.lodgeTimes[selectedFinderLodge].evening}</h4>
-                <div className="text-sm text-slate-300 font-bold mb-3 flex items-center justify-center"><CheckCircle size={18} className="mr-2"/> Live Status</div>
-                <div className="text-xs text-slate-400 font-medium">Options: 10 PM • 12 AM • 1 AM</div>
+          <div className="grid md:grid-cols-2 gap-8 mb-12">
+            <div className="rounded-[2rem] overflow-hidden shadow-xl">
+              <img src="https://images.unsplash.com/photo-1552820728-8ac41f1ce891?auto=format&fit=crop&q=80" alt="Airport transfer" className="w-full h-96 object-cover" />
+            </div>
+            <div className="flex flex-col justify-center space-y-6">
+              <h3 className="text-3xl font-bold text-slate-900">Airport Transfers</h3>
+              <p className="text-lg text-slate-600 leading-relaxed">Professional and reliable transport from Cape Town International Airport. Our experienced drivers ensure a smooth arrival for all your wedding guests.</p>
+              <div className="flex gap-4">
+                <button className="bg-teal-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-teal-700 transition-all">Book Now</button>
               </div>
             </div>
-          )}
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="flex flex-col justify-center space-y-6 order-2 md:order-1">
+              <h3 className="text-3xl font-bold text-slate-900">Wine & Dining Experiences</h3>
+              <p className="text-lg text-slate-600 leading-relaxed">Explore the stunning Elgin Valley wine estates. Perfect for pre-wedding celebrations and guest entertainment.</p>
+              <div className="flex gap-4">
+                <button className="bg-teal-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-teal-700 transition-all">Explore Tours</button>
+              </div>
+            </div>
+            <div className="rounded-[2rem] overflow-hidden shadow-xl order-1 md:order-2">
+              <img src="https://images.unsplash.com/photo-1510812431401-41d2cab2707d?auto=format&fit=crop&q=80" alt="Wine tasting" className="w-full h-96 object-cover" />
+            </div>
+          </div>
         </div>
       </section>
 
