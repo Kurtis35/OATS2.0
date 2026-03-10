@@ -120,20 +120,6 @@ ${formData.name}`);
 
   return (
     <section id="booking" className="py-12 md:py-20 bg-gradient-to-br from-gray-50 to-teal-50">
-      <form name="general-booking" data-netlify="true" data-netlify-honeypot="bot-field" className="hidden">
-        <input type="hidden" name="form-name" value="general-booking" />
-        <input type="hidden" name="booking-method" />
-        <input type="text" name="name" />
-        <input type="email" name="email" />
-        <input type="tel" name="phone" />
-        <input type="text" name="pickupLocation" />
-        <input type="text" name="destination" />
-        <input type="text" name="date" />
-        <input type="text" name="time" />
-        <input type="text" name="passengers" />
-        <input type="text" name="serviceType" />
-        <textarea name="specialRequests" />
-      </form>
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8 md:mb-12">

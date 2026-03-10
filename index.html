@@ -19,6 +19,38 @@
     <link rel="preload" href="/dark_blue_photographic_conference_event_website_(4).jpg" as="image" />
   </head>
   <body>
+    <!-- Hidden Netlify Forms declarations for SPA form detection -->
+    <form name="wedding-rsvp" netlify netlify-honeypot="bot-field" hidden>
+      <input name="form-name" type="hidden" value="wedding-rsvp" />
+      <input name="bot-field" />
+      <input name="timestamp" />
+      <input name="fullName" />
+      <input name="surname" />
+      <input name="email" />
+      <input name="phone" />
+      <input name="guestCount" />
+      <input name="passengers" />
+      <input name="accommodation" />
+      <input name="customAccommodation" />
+      <input name="shuttleChoice" />
+      <input name="additionalServices" />
+    </form>
+    <form name="general-booking" netlify netlify-honeypot="bot-field" hidden>
+      <input name="form-name" type="hidden" value="general-booking" />
+      <input name="bot-field" />
+      <input name="booking-method" />
+      <input name="name" />
+      <input name="email" />
+      <input name="phone" />
+      <input name="pickupLocation" />
+      <input name="destination" />
+      <input name="date" />
+      <input name="time" />
+      <input name="passengers" />
+      <input name="serviceType" />
+      <textarea name="specialRequests"></textarea>
+    </form>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
