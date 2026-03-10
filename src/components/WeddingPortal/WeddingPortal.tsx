@@ -110,7 +110,9 @@ const WeddingPortal = () => {
     localStorage.removeItem('weddingAccess');
   };
 
-  const handleRSVPSubmit = async () => {
+  const handleRSVPSubmit = async (e: React.FormEvent) => {
+    if (e) e.preventDefault();
+    
     const data: Booking = {
       timestamp: new Date().toLocaleString(),
       ...formData
@@ -118,7 +120,24 @@ const WeddingPortal = () => {
 
     setFormSubmitted(true);
 
-    // Send to Google Sheets
+    // 1. Netlify Forms Submission
+    const netlifyData = new URLSearchParams();
+    netlifyData.append("form-name", "wedding-rsvp");
+    Object.entries(formData).forEach(([key, value]) => {
+      netlifyData.append(key, String(value));
+    });
+
+    try {
+      await fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: netlifyData.toString(),
+      });
+    } catch (error) {
+      console.error("Netlify submission error:", error);
+    }
+
+    // 2. Google Sheets (Existing)
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyKgq_pUO2wgYmsZxLDWE81v3MIaLg4exyGh_x7CNY/exec';
     fetch(SCRIPT_URL, {
       method: 'POST',
@@ -127,22 +146,7 @@ const WeddingPortal = () => {
       body: JSON.stringify(data)
     });
 
-    // Email Notification
-    const subject = encodeURIComponent(`Wedding RSVP: ${formData.firstName} ${formData.surname}`);
-    const body = encodeURIComponent(`
-New Wedding Transport RSVP:
-Name: ${formData.firstName} ${formData.surname}
-Email: ${formData.email}
-Phone: ${formData.phone}
-Total Pax: ${formData.totalPax}
-Accommodation: ${formData.accommodation === 'Other Accommodation' ? formData.customAccommodation : formData.accommodation}
-Evening Shuttle: ${formData.eveningShuttle}
-Additional Services: ${formData.additionalServices.join(', ')}
-${formData.airportTransferType ? `Airport Transfer: ${formData.airportTransferType}` : ''}
-    `);
-    window.location.href = `mailto:Adam@overbergtransfers.com?subject=${subject}&body=${body}`;
-
-    // WhatsApp Notification
+    // 3. Client-side Fallbacks (WhatsApp/Email)
     const whatsappMsg = encodeURIComponent(`*New Wedding RSVP*\n*Name:* ${formData.firstName} ${formData.surname}\n*Pax:* ${formData.totalPax}\n*Shuttle:* ${formData.eveningShuttle}\n*Stay:* ${formData.accommodation}`);
     window.open(`https://wa.me/27795036849?text=${whatsappMsg}`, '_blank');
 
@@ -220,6 +224,27 @@ ${formData.airportTransferType ? `Airport Transfer: ${formData.airportTransferTy
             </div>
 
             <div className="p-8 md:p-16">
+              {/* Hidden Netlify Form for Detection */}
+              <form 
+                name="wedding-rsvp" 
+                data-netlify="true" 
+                netlify-honeypot="bot-field" 
+                hidden
+              >
+                <input type="hidden" name="form-name" value="wedding-rsvp" />
+                <input name="bot-field" />
+                <input name="firstName" />
+                <input name="surname" />
+                <input name="email" />
+                <input name="phone" />
+                <input name="totalPax" />
+                <input name="accommodation" />
+                <input name="customAccommodation" />
+                <input name="eveningShuttle" />
+                <input name="additionalServices" />
+                <input name="airportTransferType" />
+              </form>
+
               {rsvpStep === 1 && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
                   <h3 className="text-3xl font-bold italic font-serif">Guest Details</h3>
