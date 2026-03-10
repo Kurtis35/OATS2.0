@@ -710,63 +710,32 @@ const WeddingPortal = () => {
 
       {/* 5. FAQ SECTION */}
       <section className="py-24 bg-white">
-        <div className="max-w-4xl mx-auto px-4">
+        <div className="max-w-5xl mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-serif italic mb-4">Guest FAQs</h2>
-            <p className="text-slate-400">Everything you need to know about wedding travel.</p>
+            <h2 className="text-4xl font-serif italic mb-4">Wedding Information</h2>
+            <p className="text-slate-400">Complete guide for guests</p>
           </div>
-          <div className="space-y-4">
-            {[
-              { q: "What should I wear in Elgin weather?", a: "The valley is beautiful but can get chilly at night. We recommend formal wedding attire with a warm coat or wrap for the evening reception." },
-              { q: "When should I be ready for my shuttle?", a: "Please be waiting in the main reception or driveway area of your lodge at least 10 minutes before the scheduled pickup time." },
-              { q: "Who do I contact if I need help?", a: "For transport issues, contact Adam via WhatsApp. For general wedding queries, please refer to the main invitation." },
-              { q: "Are the roads safe at night?", a: "While the main roads are fine, farm roads are narrow and dark. Our professional drivers are experienced with the local terrain." },
-              { q: "What happens if I miss my shuttle?", a: "Latecomers will need to arrange their own private transport to the venue. Shuttles cannot wait as it impacts all other guest pickups." }
-            ].map((faq, i) => (
-              <div key={i} className="border border-slate-100 rounded-[2rem] overflow-hidden transition-all">
-                <button 
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className={`w-full p-8 text-left flex items-center justify-between transition-colors ${openFaq === i ? 'bg-teal-50' : 'bg-white hover:bg-slate-50'}`}
-                >
-                  <span className={`font-bold text-lg ${openFaq === i ? 'text-teal-900' : 'text-slate-800'}`}>{faq.q}</span>
-                  <ChevronDown className={`transition-transform duration-500 ${openFaq === i ? 'rotate-180 text-teal-600' : 'text-slate-300'}`} />
-                </button>
-                {openFaq === i && (
-                  <div className="p-8 pt-0 bg-teal-50 text-slate-600 font-light leading-relaxed animate-slide-down">
-                    {faq.a}
-                  </div>
-                )}
-              </div>
-            ))}
+          <div className="rounded-[2rem] overflow-hidden shadow-2xl border-2 border-slate-100">
+            <img src="/wedding-flyer.jpg" alt="Wedding Transport Guide" className="w-full h-auto object-cover" />
           </div>
         </div>
       </section>
 
-      {/* 6. TRAVEL IN STYLE BANNER */}
+      {/* 6. AIRPORT TRANSFERS BANNER */}
       <section className="relative py-32 bg-slate-900 overflow-hidden text-center text-white">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-black/60 z-10" />
-          <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80" alt="Experience" className="w-full h-full object-cover" />
+          <img src="https://images.unsplash.com/photo-1552820728-8ac41f1ce891?auto=format&fit=crop&q=80" alt="Airport" className="w-full h-full object-cover" />
         </div>
         <div className="relative z-20 max-w-4xl mx-auto px-4">
-          <div className="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full text-xs font-black uppercase tracking-[0.3em] mb-8">
-            <Star size={14} className="text-teal-400" />
-            <span>Experience Elgin with Overberg Transfers</span>
-          </div>
-          <h2 className="text-5xl md:text-7xl font-serif italic mb-8">Travel in Style</h2>
+          <img src="/oats-logo.jpg" alt="Overberg Airport Transfers" className="h-16 mx-auto mb-8" />
+          <h2 className="text-5xl md:text-7xl font-serif italic mb-8">Overberg Airport Transfers</h2>
           <p className="text-xl md:text-2xl font-light text-slate-300 mb-12 max-w-2xl mx-auto leading-relaxed">
-            Elevate your stay in Elgin Valley. From luxury airport transfers to exclusive private wine tours, our premium fleet is at your service.
+            Professional, reliable, and comfortable airport transfers from Cape Town International to Elgin Valley for your wedding weekend.
           </p>
           <div className="flex flex-wrap justify-center gap-6">
-            <button className="bg-white text-slate-900 px-10 py-5 rounded-[2rem] font-bold text-lg hover:bg-teal-500 hover:text-white transition-all transform hover:scale-105 active:scale-95 shadow-2xl">Book Private Transfer</button>
-            <button className="bg-transparent border-2 border-white/30 backdrop-blur-md text-white px-10 py-5 rounded-[2rem] font-bold text-lg hover:bg-white/10 transition-all">Explore Wine Tours</button>
-          </div>
-          
-          <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 opacity-60">
-            <div className="flex flex-col items-center"><Plane className="mb-2" /> <span className="text-[10px] font-bold uppercase tracking-widest">CPT Airport</span></div>
-            <div className="flex flex-col items-center"><Wine className="mb-2" /> <span className="text-[10px] font-bold uppercase tracking-widest">Wine Estates</span></div>
-            <div className="flex flex-col items-center"><Shield className="mb-2" /> <span className="text-[10px] font-bold uppercase tracking-widest">VIP Chauffeur</span></div>
-            <div className="flex flex-col items-center"><Star className="mb-2" /> <span className="text-[10px] font-bold uppercase tracking-widest">5-Star Service</span></div>
+            <button onClick={() => navigate('/')} className="bg-white text-slate-900 px-10 py-5 rounded-[2rem] font-bold text-lg hover:bg-teal-500 hover:text-white transition-all transform hover:scale-105 active:scale-95 shadow-2xl">Learn More</button>
+            <button onClick={() => navigate('/')} className="bg-transparent border-2 border-white/30 backdrop-blur-md text-white px-10 py-5 rounded-[2rem] font-bold text-lg hover:bg-white/10 transition-all">Back to Home</button>
           </div>
         </div>
       </section>
