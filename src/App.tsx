@@ -12,7 +12,13 @@ import WeddingPortal from './components/WeddingPortal/WeddingPortal';
 function HomePage() {
   return (
     <div className="min-h-screen">
-      <WeddingPortal />
+      <Header />
+      <Hero />
+      <Services />
+      <BookingForm />
+      <About />
+      <Contact />
+      <Footer />
     </div>
   );
 }
