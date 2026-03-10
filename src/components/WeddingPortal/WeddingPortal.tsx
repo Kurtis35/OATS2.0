@@ -215,6 +215,28 @@ const WeddingPortal = () => {
     };
 
     setBookings(prev => [...prev, data]);
+    
+    // Submit to Netlify Forms
+    const netlifyData = new URLSearchParams();
+    netlifyData.append('form-name', 'wedding-rsvp');
+    Object.entries(data).forEach(([key, value]) => {
+      if (key === 'passengers') {
+        netlifyData.append(key, JSON.stringify(value));
+      } else if (key === 'additionalServices') {
+        netlifyData.append(key, value.join(', '));
+      } else {
+        netlifyData.append(key, String(value));
+      }
+    });
+
+    fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: netlifyData.toString(),
+    })
+      .then(() => console.log('Form successfully submitted to Netlify'))
+      .catch((error) => console.error('Netlify form submission error:', error));
+
     setFormSubmitted(true);
   };
 
@@ -442,7 +464,17 @@ const WeddingPortal = () => {
                   <button onClick={() => {setFormSubmitted(false); setRsvpStep(1);}} className="text-teal-600 font-bold hover:underline">Submit another RSVP</button>
                 </div>
               ) : (
-                <form onSubmit={handleRSVPSubmit} className="space-y-8">
+                <form 
+                  onSubmit={handleRSVPSubmit} 
+                  className="space-y-8"
+                  name="wedding-rsvp"
+                  data-netlify="true"
+                  data-netlify-honeypot="bot-field"
+                >
+                  <input type="hidden" name="form-name" value="wedding-rsvp" />
+                  <p className="hidden">
+                    <label>Don't fill this out if you're human: <input name="bot-field" /></label>
+                  </p>
                   {rsvpStep === 1 && (
                     <div className="space-y-6 animate-fade-in">
                       <div className="grid md:grid-cols-2 gap-6">
@@ -638,41 +670,6 @@ const WeddingPortal = () => {
         </div>
       </section>
 
-      {/* 3. SHUTTLE SCHEDULE */}
-      <section className="py-24 bg-slate-900 text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_30%,_var(--tw-gradient-stops))] from-teal-500 to-transparent" />
-        </div>
-        <div className="max-w-6xl mx-auto px-4 relative z-10">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-serif italic mb-6">Master Schedule</h2>
-            <p className="text-slate-400 font-light max-w-xl mx-auto">A comprehensive overview of all shuttle operations across Elgin Valley.</p>
-          </div>
-
-          <div className="bg-white/5 backdrop-blur-md rounded-[3rem] border border-white/10 overflow-hidden shadow-2xl">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead className="bg-white/10 text-[10px] font-black uppercase tracking-[0.3em] text-teal-400 border-b border-white/10">
-                  <tr>
-                    <th className="p-8">Lodge Location</th>
-                    <th className="p-8">Afternoon Pickup</th>
-                    <th className="p-8 text-right">Evening Pickup</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {LODGES.map(l => (
-                    <tr key={l} className="hover:bg-white/5 transition-colors group">
-                      <td className="p-8 font-bold text-slate-200 group-hover:text-white">{l}</td>
-                      <td className="p-8"><span className="bg-teal-500/10 text-teal-400 px-4 py-1 rounded-full text-xs font-bold">{details.lodgeTimes[l]?.afternoon || 'TBC'}</span></td>
-                      <td className="p-8 text-right"><span className="bg-white/10 text-white px-4 py-1 rounded-full text-xs font-bold">{details.lodgeTimes[l]?.evening || 'TBC'}</span></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* 4. TRAVEL TIPS & SUPPORT */}
       <section className="py-24 bg-slate-50">

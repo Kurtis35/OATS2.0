@@ -70,34 +70,70 @@ ${formData.name}`);
     return { subject, body };
   };
 
-  const handleWhatsAppBooking = () => {
+  const handleWhatsAppBooking = (e: React.FormEvent) => {
+    e.preventDefault();
     if (!formData.name || !formData.phone || !formData.pickupLocation || !formData.destination || !formData.date || !formData.time) {
       alert('Please fill in all required fields before booking.');
       return;
     }
 
+    submitToNetlify('whatsapp');
     const whatsappMessage = generateWhatsAppMessage();
     const whatsappUrl = `https://wa.me/27795036849?text=${whatsappMessage}`;
     window.open(whatsappUrl, '_blank');
   };
 
-  const handleEmailBooking = () => {
+  const handleEmailBooking = (e: React.FormEvent) => {
+    e.preventDefault();
     if (!formData.name || !formData.email || !formData.pickupLocation || !formData.destination || !formData.date || !formData.time) {
       alert('Please fill in all required fields before booking.');
       return;
     }
 
+    submitToNetlify('email');
     const { subject, body } = generateEmailBody();
     const emailUrl = `mailto:info@overbergtransfers.com?subject=${subject}&body=${body}`;
     window.location.href = emailUrl;
   };
 
+  const submitToNetlify = (method: string) => {
+    const netlifyData = new URLSearchParams();
+    netlifyData.append('form-name', 'general-booking');
+    netlifyData.append('booking-method', method);
+    Object.entries(formData).forEach(([key, value]) => {
+      netlifyData.append(key, value);
+    });
+
+    fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: netlifyData.toString(),
+    })
+      .then(() => console.log('General booking submitted to Netlify'))
+      .catch((error) => console.error('Netlify submission error:', error));
+  };
+
   const handlePhoneCall = () => {
+    submitToNetlify('phone-call');
     window.location.href = 'tel:+27795036849';
   };
 
   return (
     <section id="booking" className="py-12 md:py-20 bg-gradient-to-br from-gray-50 to-teal-50">
+      <form name="general-booking" data-netlify="true" data-netlify-honeypot="bot-field" className="hidden">
+        <input type="hidden" name="form-name" value="general-booking" />
+        <input type="hidden" name="booking-method" />
+        <input type="text" name="name" />
+        <input type="email" name="email" />
+        <input type="tel" name="phone" />
+        <input type="text" name="pickupLocation" />
+        <input type="text" name="destination" />
+        <input type="text" name="date" />
+        <input type="text" name="time" />
+        <input type="text" name="passengers" />
+        <input type="text" name="serviceType" />
+        <textarea name="specialRequests" />
+      </form>
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8 md:mb-12">
