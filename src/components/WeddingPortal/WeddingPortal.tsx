@@ -440,18 +440,18 @@ const WeddingPortal = () => {
   return (
     <div className="min-h-screen bg-white font-sans selection:bg-teal-100">
       {/* 1. GUEST TRANSPORT BOOKING FORM */}
-      <section className="relative py-20 bg-slate-50 overflow-hidden">
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-teal-500/5 -skew-x-12 transform translate-x-1/2" />
+      <section className="relative py-24 md:py-32 bg-gradient-to-br from-slate-50 via-teal-50 to-blue-50 overflow-hidden">
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-teal-500/10 -skew-x-12 transform translate-x-1/2" />
         <div className="max-w-4xl mx-auto px-4 relative z-10">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-serif italic text-slate-900 mb-4">Transport RSVP</h2>
-            <p className="text-slate-500 font-light tracking-wide">Please confirm your shuttle requirements below.</p>
+          <div className="text-center mb-14 md:mb-16">
+            <h2 className="text-5xl md:text-6xl font-serif italic text-slate-900 mb-6 leading-tight">Transport RSVP</h2>
+            <p className="text-lg md:text-xl text-slate-600 font-medium tracking-wide">Confirm your shuttle preferences and we'll handle the rest.</p>
           </div>
 
-          <div className="bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden">
-            <div className="flex border-b border-slate-50">
+          <div className="bg-white rounded-[2.5rem] shadow-2xl border-2 border-slate-100 overflow-hidden">
+            <div className="flex border-b-2 border-slate-100 bg-slate-50/50">
               {[1, 2, 3, 4, 5].map(step => (
-                <div key={step} className={`flex-1 py-4 text-center text-[10px] font-black uppercase tracking-[0.2em] transition-colors ${rsvpStep === step ? 'text-teal-600 bg-teal-50' : 'text-slate-300'}`}>Step {step}</div>
+                <div key={step} className={`flex-1 py-5 text-center text-[11px] font-black uppercase tracking-[0.2em] transition-all ${rsvpStep === step ? 'text-teal-600 bg-teal-100/50 border-b-4 border-teal-600' : 'text-slate-400'}`}>Step {step}</div>
               ))}
             </div>
 
@@ -566,25 +566,32 @@ const WeddingPortal = () => {
                   )}
 
                   {rsvpStep === 4 && (
-                    <div className="space-y-6 animate-fade-in">
-                      <div className="space-y-2 text-center mb-8">
-                        <label className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4 block">Preferred Pickup Shuttle</label>
-                        <div className="grid grid-cols-2 gap-4">
-                          {['Afternoon', 'Evening'].map(type => (
-                            <label key={type} className="relative cursor-pointer">
-                              <input required type="radio" name="shuttleChoice" value={type} className="peer sr-only" />
-                              <div className="p-8 rounded-3xl border-2 border-slate-100 bg-slate-50 text-slate-400 font-bold peer-checked:border-teal-500 peer-checked:text-teal-600 peer-checked:bg-teal-50 transition-all">
-                                {type === 'Afternoon' ? <Sun className="mx-auto mb-2" /> : <Clock className="mx-auto mb-2" />}
-                                {type} Shuttle
-                              </div>
-                            </label>
-                          ))}
+                    <div className="space-y-8 animate-fade-in">
+                      <div className="space-y-4 text-center mb-10">
+                        <label className="text-sm md:text-base font-black uppercase tracking-widest text-slate-800 mb-6 block">Select Your Preferred Shuttle</label>
+                        <div className="grid grid-cols-2 gap-4 md:gap-6">
+                          <label className="relative cursor-pointer group">
+                            <input required type="radio" name="shuttleChoice" value="Afternoon" className="peer sr-only" />
+                            <div className="p-8 md:p-10 rounded-3xl border-2 border-slate-200 bg-white text-slate-600 font-bold peer-checked:border-teal-600 peer-checked:text-teal-700 peer-checked:bg-teal-50 peer-checked:shadow-lg transition-all transform group-hover:shadow-md group-hover:border-teal-300">
+                              <Sun className="mx-auto mb-3 text-teal-500" size={32} />
+                              <div className="text-lg md:text-xl">Afternoon</div>
+                              <div className="text-xs text-slate-500 mt-2">Early departure</div>
+                            </div>
+                          </label>
+                          <label className="relative cursor-pointer group">
+                            <input required type="radio" name="shuttleChoice" value="Evening" className="peer sr-only" />
+                            <div className="p-8 md:p-10 rounded-3xl border-2 border-slate-200 bg-white text-slate-600 font-bold peer-checked:border-teal-600 peer-checked:text-teal-700 peer-checked:bg-teal-50 peer-checked:shadow-lg transition-all transform group-hover:shadow-md group-hover:border-teal-300">
+                              <Clock className="mx-auto mb-3 text-teal-500" size={32} />
+                              <div className="text-lg md:text-xl">Evening</div>
+                              <div className="text-xs text-slate-500 mt-2">10 PM, 12 AM, 1 AM</div>
+                            </div>
+                          </label>
                         </div>
                       </div>
-                      <div className="flex gap-4">
-                        <button type="button" onClick={() => setRsvpStep(3)} className="flex-1 bg-slate-100 py-5 rounded-2xl font-bold text-slate-500">Back</button>
-                        <button type="button" onClick={() => setRsvpStep(5)} className="flex-[2] bg-slate-900 text-white py-5 rounded-2xl font-bold flex items-center justify-center group">
-                          Next Step <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+                      <div className="flex gap-4 pt-6">
+                        <button type="button" onClick={() => setRsvpStep(3)} className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 py-5 md:py-6 rounded-2xl font-bold transition-all transform active:scale-95">Back</button>
+                        <button type="button" onClick={() => setRsvpStep(5)} className="flex-[2] bg-gradient-to-r from-teal-600 to-teal-700 text-white py-5 md:py-6 rounded-2xl font-bold flex items-center justify-center group shadow-lg hover:shadow-xl hover:from-teal-700 hover:to-teal-800 transition-all transform active:scale-95">
+                          Next Step <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={20} />
                         </button>
                       </div>
                     </div>
@@ -633,37 +640,39 @@ const WeddingPortal = () => {
       </section>
 
       {/* 2. LODGE PICKUP FINDER */}
-      <section className="py-24 bg-white relative overflow-hidden">
+      <section className="py-28 md:py-36 bg-gradient-to-b from-white to-slate-50 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.05),transparent)]" />
         <div className="max-w-4xl mx-auto px-4 relative z-10 text-center">
-          <div className="inline-block mb-4 px-3 py-1 bg-teal-50 text-teal-600 rounded-full text-[10px] font-black uppercase tracking-widest">Interactive Tool</div>
-          <h2 className="text-4xl md:text-5xl font-serif italic text-slate-900 mb-6">Lodge Pickup Finder</h2>
-          <p className="text-slate-500 font-light mb-12 max-w-xl mx-auto">Select your accommodation below to find your specific shuttle departure times for the big day.</p>
+          <div className="inline-block mb-6 px-4 py-2 bg-teal-100 text-teal-700 rounded-full text-[11px] font-black uppercase tracking-widest shadow-sm">Interactive Tool</div>
+          <h2 className="text-5xl md:text-6xl font-serif italic text-slate-900 mb-8 leading-tight">Lodge Pickup Finder</h2>
+          <p className="text-lg md:text-xl text-slate-600 font-medium mb-14 max-w-xl mx-auto leading-relaxed">Select your accommodation to discover your exact shuttle times for the day.</p>
           
-          <div className="max-w-md mx-auto relative mb-12">
+          <div className="max-w-md mx-auto relative mb-16">
             <select 
               value={selectedFinderLodge}
               onChange={e => setSelectedFinderLodge(e.target.value)}
-              className="w-full px-8 py-5 rounded-[2rem] border-2 border-slate-100 bg-slate-50 text-slate-800 font-bold focus:outline-none focus:border-teal-500 appearance-none cursor-pointer transition-all text-center shadow-inner"
+              className="w-full px-8 py-6 rounded-[2rem] border-2 border-slate-300 bg-white text-slate-800 font-bold focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100 appearance-none cursor-pointer transition-all text-base shadow-md"
             >
               <option value="">Choose your lodge...</option>
               {LODGES.map(l => <option key={l} value={l}>{l}</option>)}
             </select>
-            <ChevronDown className="absolute right-8 top-1/2 -translate-y-1/2 text-teal-500 pointer-events-none" />
+            <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 text-teal-600 pointer-events-none" size={24} />
           </div>
 
           {selectedFinderLodge && details.lodgeTimes[selectedFinderLodge] && (
-            <div className="grid md:grid-cols-2 gap-8 animate-fade-in-up">
-              <div className="bg-teal-50 p-10 rounded-[2.5rem] border border-teal-100 group hover:shadow-2xl transition-all duration-500">
-                <Sun className="mx-auto text-teal-500 mb-4" size={32} />
-                <p className="text-[10px] font-black uppercase tracking-widest text-teal-600 mb-2">Afternoon Shuttle</p>
-                <h4 className="text-5xl font-black text-teal-900 mb-2">{details.lodgeTimes[selectedFinderLodge].afternoon}</h4>
-                <div className="flex items-center justify-center text-teal-700 font-bold text-sm"><CheckCircle size={14} className="mr-2"/> On Time</div>
+            <div className="grid md:grid-cols-2 gap-8 md:gap-10 animate-fade-in-up">
+              <div className="bg-gradient-to-br from-teal-50 to-teal-100 p-12 rounded-[2.5rem] border-2 border-teal-200 group hover:shadow-2xl hover:border-teal-300 transition-all duration-500 transform hover:-translate-y-2">
+                <Sun className="mx-auto text-teal-600 mb-6" size={40} />
+                <p className="text-[11px] font-black uppercase tracking-widest text-teal-700 mb-4">Afternoon Shuttle</p>
+                <h4 className="text-6xl font-black text-teal-900 mb-4">{details.lodgeTimes[selectedFinderLodge].afternoon}</h4>
+                <div className="flex items-center justify-center text-teal-800 font-bold"><CheckCircle size={18} className="mr-2"/> On Schedule</div>
               </div>
-              <div className="bg-slate-900 p-10 rounded-[2.5rem] text-white group hover:shadow-2xl transition-all duration-500">
-                <Clock className="mx-auto text-teal-400 mb-4" size={32} />
-                <p className="text-[10px] font-black uppercase tracking-widest text-teal-400 mb-2">Evening Shuttle</p>
-                <h4 className="text-5xl font-black text-white mb-2">{details.lodgeTimes[selectedFinderLodge].evening}</h4>
-                <div className="flex items-center justify-center text-slate-400 font-bold text-sm"><CheckCircle size={14} className="mr-2"/> Live Status</div>
+              <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-12 rounded-[2.5rem] border-2 border-teal-500/30 group hover:shadow-2xl hover:border-teal-500 transition-all duration-500 transform hover:-translate-y-2">
+                <Clock className="mx-auto text-teal-400 mb-6" size={40} />
+                <p className="text-[11px] font-black uppercase tracking-widest text-teal-400 mb-4">Evening Shuttle</p>
+                <h4 className="text-6xl font-black text-white mb-4">{details.lodgeTimes[selectedFinderLodge].evening}</h4>
+                <div className="text-sm text-slate-300 font-bold mb-3 flex items-center justify-center"><CheckCircle size={18} className="mr-2"/> Live Status</div>
+                <div className="text-xs text-slate-400 font-medium">Options: 10 PM • 12 AM • 1 AM</div>
               </div>
             </div>
           )}
