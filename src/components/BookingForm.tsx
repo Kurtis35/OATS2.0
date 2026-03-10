@@ -126,31 +126,31 @@ ${formData.name}`);
     <section id="booking" className="py-12 md:py-24 bg-slate-900 text-white relative overflow-hidden">
       {/* Background Decor */}
       <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-teal-500 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-500 rounded-full blur-[120px]" />
+        <div className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-teal-500 rounded-full blur-[150px]" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-blue-500 rounded-full blur-[150px]" />
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12 md:mb-16">
-            <span className="inline-block px-4 py-1 bg-teal-500/10 text-teal-400 rounded-full text-sm font-bold tracking-widest uppercase mb-4 border border-teal-500/20">
-              Premium Service
+          <div className="text-center mb-12 md:mb-20">
+            <span className="inline-block px-6 py-2 bg-teal-500/10 text-teal-400 rounded-full text-xs font-black tracking-[0.3em] uppercase mb-6 border border-teal-500/20 shadow-lg shadow-teal-500/10">
+              Elite Transport
             </span>
-            <h2 className="text-4xl md:text-6xl font-black mb-6 bg-gradient-to-r from-white via-teal-200 to-white bg-clip-text text-transparent italic">
-              Experience the Journey
+            <h2 className="text-5xl md:text-8xl font-black mb-8 bg-gradient-to-b from-white via-white to-slate-500 bg-clip-text text-transparent italic tracking-tight">
+              Book Your Experience
             </h2>
-            <p className="text-xl text-slate-400 font-light max-w-2xl mx-auto">
-              Bespoke transport solutions tailored to your schedule. Choose your preferred method to confirm your booking.
+            <p className="text-xl md:text-2xl text-slate-400 font-light max-w-2xl mx-auto leading-relaxed">
+              Bespoke travel solutions for the discerning guest. Seamless coordination, luxury fleet, and professional service.
             </p>
           </div>
 
-          <div className="bg-white/5 backdrop-blur-2xl rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden">
+          <div className="bg-white/5 backdrop-blur-3xl rounded-[3.5rem] border border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] overflow-hidden">
             {/* Progress Bar */}
             <div className="flex h-1.5 bg-white/5">
               {[1, 2, 3, 4].map((i) => (
                 <div 
                   key={i} 
-                  className={`flex-1 transition-all duration-700 ${i <= step ? 'bg-gradient-to-r from-teal-500 to-blue-500' : ''}`}
+                  className={`flex-1 transition-all duration-1000 ease-out ${i <= step ? 'bg-gradient-to-r from-teal-500 via-blue-500 to-teal-500 bg-[length:200%_100%] animate-gradient' : ''}`}
                 />
               ))}
             </div>
