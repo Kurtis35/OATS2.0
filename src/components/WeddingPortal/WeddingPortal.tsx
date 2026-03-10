@@ -52,6 +52,7 @@ interface Booking {
   accommodation: string;
   customAccommodation?: string;
   shuttleChoice: 'Afternoon' | 'Evening';
+  eveningShuttleTime?: '10 PM' | '12 AM' | '1 AM';
   additionalServices: string[];
 }
 
@@ -84,24 +85,24 @@ const LODGES = [
 ];
 
 const DEFAULT_LODGE_TIMES: Record<string, { afternoon: string; evening: string }> = {
-  "Elgin River Lodge": { afternoon: "1:45 PM", evening: "6:00 PM" },
-  "33 Viljoenshoop Road": { afternoon: "2:00 PM", evening: "6:15 PM" },
-  "Lavendar Cottages": { afternoon: "2:10 PM", evening: "6:25 PM" },
-  "Cheverals Farm": { afternoon: "2:20 PM", evening: "6:35 PM" },
-  "Oaklane Cottages": { afternoon: "2:30 PM", evening: "6:45 PM" },
-  "Elgin Country Lodge": { afternoon: "2:40 PM", evening: "6:55 PM" },
-  "Galileo": { afternoon: "2:50 PM", evening: "7:05 PM" },
-  "Elgin Vintners": { afternoon: "1:55 PM", evening: "6:10 PM" },
-  "Moortop Cottages": { afternoon: "2:05 PM", evening: "6:20 PM" },
-  "Villa Eike": { afternoon: "2:15 PM", evening: "6:30 PM" },
-  "Belfield Wines": { afternoon: "2:25 PM", evening: "6:40 PM" },
-  "South Hill": { afternoon: "2:35 PM", evening: "6:50 PM" },
-  "Villa Exner": { afternoon: "2:45 PM", evening: "7:00 PM" },
-  "Apple Mountain Guest Farm": { afternoon: "1:40 PM", evening: "5:55 PM" },
-  "Vredenhof": { afternoon: "1:50 PM", evening: "6:05 PM" },
-  "Wildekrans Country House": { afternoon: "2:00 PM", evening: "6:15 PM" },
-  "Endless Vinyards WWE": { afternoon: "2:10 PM", evening: "6:25 PM" },
-  "Inn On Highlands": { afternoon: "2:20 PM", evening: "6:35 PM" }
+  "Elgin River Lodge": { afternoon: "1:45 PM", evening: "10 PM, 12 AM, 1 AM" },
+  "33 Viljoenshoop Road": { afternoon: "2:00 PM", evening: "10 PM, 12 AM, 1 AM" },
+  "Lavendar Cottages": { afternoon: "2:10 PM", evening: "10 PM, 12 AM, 1 AM" },
+  "Cheverals Farm": { afternoon: "2:20 PM", evening: "10 PM, 12 AM, 1 AM" },
+  "Oaklane Cottages": { afternoon: "2:30 PM", evening: "10 PM, 12 AM, 1 AM" },
+  "Elgin Country Lodge": { afternoon: "2:40 PM", evening: "10 PM, 12 AM, 1 AM" },
+  "Galileo": { afternoon: "2:50 PM", evening: "10 PM, 12 AM, 1 AM" },
+  "Elgin Vintners": { afternoon: "1:55 PM", evening: "10 PM, 12 AM, 1 AM" },
+  "Moortop Cottages": { afternoon: "2:05 PM", evening: "10 PM, 12 AM, 1 AM" },
+  "Villa Eike": { afternoon: "2:15 PM", evening: "10 PM, 12 AM, 1 AM" },
+  "Belfield Wines": { afternoon: "2:25 PM", evening: "10 PM, 12 AM, 1 AM" },
+  "South Hill": { afternoon: "2:35 PM", evening: "10 PM, 12 AM, 1 AM" },
+  "Villa Exner": { afternoon: "2:45 PM", evening: "10 PM, 12 AM, 1 AM" },
+  "Apple Mountain Guest Farm": { afternoon: "1:40 PM", evening: "10 PM, 12 AM, 1 AM" },
+  "Vredenhof": { afternoon: "1:50 PM", evening: "10 PM, 12 AM, 1 AM" },
+  "Wildekrans Country House": { afternoon: "2:00 PM", evening: "10 PM, 12 AM, 1 AM" },
+  "Endless Vinyards WWE": { afternoon: "2:10 PM", evening: "10 PM, 12 AM, 1 AM" },
+  "Inn On Highlands": { afternoon: "2:20 PM", evening: "10 PM, 12 AM, 1 AM" }
 };
 
 const WeddingPortal = () => {
@@ -121,6 +122,8 @@ const WeddingPortal = () => {
   const [passengers, setPassengers] = useState<Passenger[]>([{ firstName: '', lastName: '' }]);
   const [selectedLodgeRSVP, setSelectedLodgeRSVP] = useState('');
   const [additionalServices, setAdditionalServices] = useState<string[]>([]);
+  const [shuttleChoice, setShuttleChoice] = useState<'Afternoon' | 'Evening' | ''>('');
+  const [eveningShuttleTime, setEveningShuttleTime] = useState<'10 PM' | '12 AM' | '1 AM' | ''>('');
 
   // UI State
   const [selectedFinderLodge, setSelectedFinderLodge] = useState('');
@@ -200,6 +203,7 @@ const WeddingPortal = () => {
   const handleRSVPSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+    const chosenShuttle = formData.get('shuttleChoice') as 'Afternoon' | 'Evening';
     const data: Booking = {
       timestamp: new Date().toLocaleString(),
       fullName: formData.get('fullName') as string,
@@ -210,7 +214,8 @@ const WeddingPortal = () => {
       passengers,
       accommodation: selectedLodgeRSVP,
       customAccommodation: formData.get('customAccommodation') as string,
-      shuttleChoice: formData.get('shuttleChoice') as 'Afternoon' | 'Evening',
+      shuttleChoice: chosenShuttle,
+      eveningShuttleTime: chosenShuttle === 'Evening' ? eveningShuttleTime as '10 PM' | '12 AM' | '1 AM' : undefined,
       additionalServices
     };
 
@@ -579,7 +584,7 @@ const WeddingPortal = () => {
                         <label className="text-sm md:text-base font-black uppercase tracking-widest text-slate-800 mb-6 block">Select Your Preferred Shuttle</label>
                         <div className="grid grid-cols-2 gap-4 md:gap-6">
                           <label className="relative cursor-pointer group">
-                            <input required type="radio" name="shuttleChoice" value="Afternoon" className="peer sr-only" />
+                            <input required type="radio" name="shuttleChoice" value="Afternoon" onChange={(e) => setShuttleChoice(e.target.value as 'Afternoon')} className="peer sr-only" />
                             <div className="p-8 md:p-10 rounded-3xl border-2 border-slate-200 bg-white text-slate-600 font-bold peer-checked:border-teal-600 peer-checked:text-teal-700 peer-checked:bg-teal-50 peer-checked:shadow-lg transition-all transform group-hover:shadow-md group-hover:border-teal-300">
                               <Sun className="mx-auto mb-3 text-teal-500" size={32} />
                               <div className="text-lg md:text-xl">Afternoon</div>
@@ -587,7 +592,7 @@ const WeddingPortal = () => {
                             </div>
                           </label>
                           <label className="relative cursor-pointer group">
-                            <input required type="radio" name="shuttleChoice" value="Evening" className="peer sr-only" />
+                            <input required type="radio" name="shuttleChoice" value="Evening" onChange={(e) => setShuttleChoice(e.target.value as 'Evening')} className="peer sr-only" />
                             <div className="p-8 md:p-10 rounded-3xl border-2 border-slate-200 bg-white text-slate-600 font-bold peer-checked:border-teal-600 peer-checked:text-teal-700 peer-checked:bg-teal-50 peer-checked:shadow-lg transition-all transform group-hover:shadow-md group-hover:border-teal-300">
                               <Clock className="mx-auto mb-3 text-teal-500" size={32} />
                               <div className="text-lg md:text-xl">Evening</div>
@@ -596,9 +601,32 @@ const WeddingPortal = () => {
                           </label>
                         </div>
                       </div>
+                      
+                      {shuttleChoice === 'Evening' && (
+                        <div className="space-y-4 animate-slide-down">
+                          <label className="text-sm md:text-base font-black uppercase tracking-widest text-slate-800 mb-6 block">What time would you prefer for evening pickup?</label>
+                          <div className="grid grid-cols-3 gap-3 md:gap-4">
+                            {['10 PM', '12 AM', '1 AM'].map(time => (
+                              <label key={time} className="relative cursor-pointer group">
+                                <input type="radio" name="eveningTime" value={time} checked={eveningShuttleTime === time} onChange={(e) => setEveningShuttleTime(e.target.value as '10 PM' | '12 AM' | '1 AM')} className="peer sr-only" />
+                                <div className="p-5 md:p-6 rounded-2xl border-2 border-slate-200 bg-white text-slate-600 font-bold text-center peer-checked:border-teal-600 peer-checked:text-teal-700 peer-checked:bg-teal-50 peer-checked:shadow-lg transition-all transform group-hover:shadow-md group-hover:border-teal-300">
+                                  <div className="text-lg md:text-xl">{time}</div>
+                                </div>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
                       <div className="flex gap-4 pt-6">
                         <button type="button" onClick={() => setRsvpStep(3)} className="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 py-5 md:py-6 rounded-2xl font-bold transition-all transform active:scale-95">Back</button>
-                        <button type="button" onClick={() => setRsvpStep(5)} className="flex-[2] bg-gradient-to-r from-teal-600 to-teal-700 text-white py-5 md:py-6 rounded-2xl font-bold flex items-center justify-center group shadow-lg hover:shadow-xl hover:from-teal-700 hover:to-teal-800 transition-all transform active:scale-95">
+                        <button type="button" onClick={() => {
+                          if (shuttleChoice === 'Evening' && !eveningShuttleTime) {
+                            alert('Please select an evening time');
+                            return;
+                          }
+                          setRsvpStep(5);
+                        }} className="flex-[2] bg-gradient-to-r from-teal-600 to-teal-700 text-white py-5 md:py-6 rounded-2xl font-bold flex items-center justify-center group shadow-lg hover:shadow-xl hover:from-teal-700 hover:to-teal-800 transition-all transform active:scale-95">
                           Next Step <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={20} />
                         </button>
                       </div>
