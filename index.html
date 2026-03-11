@@ -20,7 +20,7 @@
   </head>
   <body>
     <!-- Hidden Netlify Forms declarations for SPA form detection -->
-    <form name="wedding-rsvp" netlify netlify-honeypot="bot-field" hidden>
+    <form name="wedding-rsvp" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
       <input name="form-name" type="hidden" value="wedding-rsvp" />
       <input name="bot-field" />
       <input name="timestamp" />
@@ -33,9 +33,10 @@
       <input name="accommodation" />
       <input name="customAccommodation" />
       <input name="shuttleChoice" />
+      <input name="eveningShuttleTime" />
       <input name="additionalServices" />
     </form>
-    <form name="general-booking" netlify netlify-honeypot="bot-field" hidden>
+    <form name="general-booking" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
       <input name="form-name" type="hidden" value="general-booking" />
       <input name="bot-field" />
       <input name="booking-method" />

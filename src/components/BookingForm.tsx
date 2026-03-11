@@ -70,33 +70,33 @@ ${formData.name}`);
     return { subject, body };
   };
 
-  const handleWhatsAppBooking = (e: React.FormEvent) => {
+  const handleWhatsAppBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.phone || !formData.pickupLocation || !formData.destination || !formData.date || !formData.time) {
       alert('Please fill in all required fields before booking.');
       return;
     }
 
-    submitToNetlify('whatsapp');
+    await submitToNetlify('whatsapp');
     const whatsappMessage = generateWhatsAppMessage();
     const whatsappUrl = `https://wa.me/27795036849?text=${whatsappMessage}`;
     window.open(whatsappUrl, '_blank');
   };
 
-  const handleEmailBooking = (e: React.FormEvent) => {
+  const handleEmailBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.pickupLocation || !formData.destination || !formData.date || !formData.time) {
       alert('Please fill in all required fields before booking.');
       return;
     }
 
-    submitToNetlify('email');
+    await submitToNetlify('email');
     const { subject, body } = generateEmailBody();
     const emailUrl = `mailto:info@overbergtransfers.com?subject=${subject}&body=${body}`;
     window.location.href = emailUrl;
   };
 
-  const submitToNetlify = (method: string) => {
+  const submitToNetlify = async (method: string) => {
     const netlifyData = new URLSearchParams();
     netlifyData.append('form-name', 'general-booking');
     netlifyData.append('booking-method', method);
@@ -104,17 +104,20 @@ ${formData.name}`);
       netlifyData.append(key, value);
     });
 
-    fetch('/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: netlifyData.toString(),
-    })
-      .then(() => console.log('General booking submitted to Netlify'))
-      .catch((error) => console.error('Netlify submission error:', error));
+    try {
+      await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: netlifyData.toString(),
+      });
+      console.log('General booking submitted to Netlify');
+    } catch (error) {
+      console.error('Netlify submission error:', error);
+    }
   };
 
-  const handlePhoneCall = () => {
-    submitToNetlify('phone-call');
+  const handlePhoneCall = async () => {
+    await submitToNetlify('phone-call');
     window.location.href = 'tel:+27795036849';
   };
 
