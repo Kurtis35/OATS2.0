@@ -200,7 +200,7 @@ const WeddingPortal = () => {
     setPassengers(newPassengers);
   };
 
-  const handleRSVPSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleRSVPSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const chosenShuttle = formData.get('shuttleChoice') as 'Afternoon' | 'Evening';
@@ -220,7 +220,7 @@ const WeddingPortal = () => {
     };
 
     setBookings(prev => [...prev, data]);
-    
+
     // Submit to Netlify Forms
     const netlifyData = new URLSearchParams();
     netlifyData.append('form-name', 'wedding-rsvp');
@@ -228,19 +228,22 @@ const WeddingPortal = () => {
       if (key === 'passengers') {
         netlifyData.append(key, JSON.stringify(value));
       } else if (key === 'additionalServices') {
-        netlifyData.append(key, value.join(', '));
-      } else {
+        netlifyData.append(key, (value as string[]).join(', '));
+      } else if (value !== undefined) {
         netlifyData.append(key, String(value));
       }
     });
 
-    fetch('/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: netlifyData.toString(),
-    })
-      .then(() => console.log('Form successfully submitted to Netlify'))
-      .catch((error) => console.error('Netlify form submission error:', error));
+    try {
+      await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: netlifyData.toString(),
+      });
+      console.log('Form successfully submitted to Netlify');
+    } catch (error) {
+      console.error('Netlify form submission error:', error);
+    }
 
     setFormSubmitted(true);
   };
